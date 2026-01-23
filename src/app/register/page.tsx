@@ -63,7 +63,9 @@ export default function RegisterPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
       <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
         <div className="mb-6 text-center">
-          <p className="text-sm font-medium text-orange-500">BUSCA BUSCA</p>
+          <div className="mx-auto mb-2 h-16 w-16 overflow-hidden">
+            <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
+          </div>
           <h1 className="mt-1 text-xl font-semibold text-zinc-800">Criar sua conta</h1>
           <p className="mt-1 text-xs text-zinc-500">Cadastre-se para aproveitar todas as ofertas.</p>
         </div>
@@ -79,7 +81,7 @@ export default function RegisterPage() {
               type="text"
               value={values.name}
               onChange={handleChange}
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-orange-500/40 focus:border-orange-500 focus:ring-2"
+              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-primary/40 focus:border-primary focus:ring-2"
               placeholder="Seu nome"
             />
             {errors.name && <p className="text-[11px] text-red-500">{errors.name}</p>}

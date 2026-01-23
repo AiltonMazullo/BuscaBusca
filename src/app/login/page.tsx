@@ -59,7 +59,9 @@ function LoginForm() {
   return (
     <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
       <div className="mb-6 text-center">
-        <p className="text-sm font-medium text-orange-500">Busca Busca</p>
+        <div className="mx-auto mb-2 h-16 w-16 overflow-hidden">
+          <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
+        </div>
         <h1 className="mt-1 text-xl font-semibold text-zinc-800">Entrar na loja virtual</h1>
         <p className="mt-1 text-xs text-zinc-500">Acesse sua conta para finalizar suas compras.</p>
       </div>
@@ -75,7 +77,7 @@ function LoginForm() {
             type="email"
             value={values.email}
             onChange={handleChange}
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-orange-500/40 focus:border-orange-500 focus:ring-2"
+            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-primary/40 focus:border-primary focus:ring-2"
             placeholder="seuemail@exemplo.com"
           />
           {errors.email && <p className="text-[11px] text-red-500">{errors.email}</p>}
@@ -91,7 +93,7 @@ function LoginForm() {
             type="password"
             value={values.password}
             onChange={handleChange}
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-orange-500/40 focus:border-orange-500 focus:ring-2"
+            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-primary/40 focus:border-primary focus:ring-2"
             placeholder="Mínimo de 6 caracteres"
           />
           {errors.password && <p className="text-[11px] text-red-500">{errors.password}</p>}
@@ -100,7 +102,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 w-full rounded-full bg-orange-500 py-2.5 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.01] hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
+          className="mt-2 w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.01] hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/50"
         >
           {isSubmitting ? "Entrando..." : "Entrar"}
         </button>
@@ -108,7 +110,7 @@ function LoginForm() {
 
       <p className="mt-4 text-center text-xs text-zinc-500">
         Ainda não tem conta?
-        <Link href="/register" className="ml-1 font-semibold text-orange-500">
+        <Link href="/register" className="ml-1 font-semibold text-primary">
           Criar conta
         </Link>
       </p>

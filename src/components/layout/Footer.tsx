@@ -1,14 +1,19 @@
 export function Footer() {
   return (
-    <footer className="mt-10 border-t border-zinc-200 bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 text-sm text-zinc-700 md:flex-row md:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-col">
-            <span className="text-base font-semibold text-primary">Busca Busca</span>
-            <span className="text-xs text-zinc-500">Loja Virtual</span>
+    <footer className="mt-auto w-full bg-zinc-50 border-t border-zinc-200">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-8 px-4 py-8 md:flex-row md:justify-between">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 overflow-hidden">
+              <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-lg font-bold text-primary">Busca Busca</span>
+              <span className="text-xs text-zinc-500">Loja Virtual</span>
+            </div>
           </div>
-          <p className="max-w-xs text-xs text-zinc-500">
-            Atendimento para todo o Brasil. Compre e receba em casa ou retire na loja.
+          <p className="max-w-xs text-sm text-zinc-500">
+            A sua loja online de confiança. Encontre tudo o que precisa com o melhor preço e qualidade.
           </p>
         </div>
         <div className="space-y-2 text-xs">
