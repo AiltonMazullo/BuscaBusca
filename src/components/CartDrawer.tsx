@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { Trash2 } from "lucide-react";
 // import { formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
@@ -73,9 +74,9 @@ export function CartDrawer() {
                         <button
                           type="button"
                           onClick={() => removeFromCart(item.product.id)}
-                          className="text-xs text-zinc-400 hover:text-red-500"
+                          className="text-zinc-400 hover:text-red-500 transition-colors"
                         >
-                          🗑
+                          <Trash2 size={16} />
                         </button>
                       </div>
                       <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">

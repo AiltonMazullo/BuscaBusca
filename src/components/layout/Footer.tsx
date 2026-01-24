@@ -1,3 +1,5 @@
+import { Facebook, Linkedin } from "lucide-react";
+
 export function Footer() {
   return (
     <footer className="mt-auto w-full bg-zinc-50 border-t border-zinc-200">
@@ -24,8 +26,12 @@ export function Footer() {
         <div className="space-y-3 text-xs">
           <p className="font-semibold text-zinc-700">Siga nas redes</p>
           <div className="flex gap-3">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">f</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">in</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Facebook size={16} />
+            </span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Linkedin size={16} />
+            </span>
           </div>
         </div>
       </div>
