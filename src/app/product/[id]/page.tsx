@@ -2,6 +2,7 @@ import { products } from "@/lib/products";
 import { notFound } from "next/navigation";
 import { ShoppingCart, Truck, ShieldCheck, CreditCard } from "lucide-react";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { ProductCard } from "@/components/ProductCard";
 
 interface ProductPageProps {
   params: Promise<{
