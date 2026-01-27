@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -144,16 +144,26 @@ function HeaderFeaturedProduct() {
 export function Header() {
   const { totalQuantity, openCart } = useCart();
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
   return (
-    <header className="w-full bg-white shadow-sm">
+    <header className={`w-full bg-white shadow-sm z-50 transition-all duration-300 ${!isAuthPage ? 'sticky top-0' : ''}`}>
       {!isAuthPage && (
         <>
           {/* Top Bar */}
-          <div className="w-full bg-primary text-xs font-medium text-white">
-            <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-2">
+          <div className={`w-full bg-primary text-xs font-medium text-white transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 opacity-0' : 'h-10 opacity-100'}`}>
+            <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-2 h-full">
               <span>PRECISA DE AJUDA?</span>
               <div className="flex items-center gap-2">
                 <Bus size={30} className="text-white" />
@@ -164,15 +174,14 @@ export function Header() {
           </div>
 
           {/* Main Header */}
-          <div className="hidden md:flex mx-auto max-w-[1280px] items-center justify-between gap-8 px-4 py-6">
+          <div className={`hidden md:flex mx-auto max-w-[1280px] items-center justify-between gap-8 px-4 transition-all duration-300 ${isScrolled ? 'py-2' : 'py-6'}`}>
             {/* Logo */}
             <Link href="/" className="flex flex-shrink-0 items-center gap-2">
-              <div className="h-12 w-12 overflow-hidden">
+              <div className={`overflow-hidden transition-all duration-300 ${isScrolled ? 'h-8 w-8' : 'h-12 w-12'}`}>
                 <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-xl font-bold text-primary">Busca Busca</span>
-                <span className="text-[10px] text-zinc-500">Loja Virtual</span>
+                <span className={`font-bold text-primary transition-all duration-300 ${isScrolled ? 'text-lg' : 'text-xl'}`}>Busca Busca</span>
               </div>
             </Link>
 
@@ -200,15 +209,12 @@ export function Header() {
               <button
                 type="button"
                 onClick={openCart}
-                className="group relative flex items-center gap-2 text-zinc-700 hover:text-primary">
-                <div className="relative">
-                  <ShoppingCart size={28} className="text-primary"/>
-                  {totalQuantity > 0 && (
-                    <span className="absolute -right-2 -top-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shadow-sm">
-                      {totalQuantity}
-                    </span>
-                  )}
-                </div>
+                className="flex items-center gap-2 transition-opacity hover:opacity-80"
+              >
+                <ShoppingCart size={28} className="text-primary" />
+                <span className="flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-primary px-1 text-xs font-bold text-white">
+                  {totalQuantity}
+                </span>
               </button>
             </div>
           </div>
@@ -224,7 +230,7 @@ export function Header() {
                       <NavigationMenuItem key={item.label}>
                         {item.children ? (
                           <>
-                            <NavigationMenuTrigger className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[13px] font-semibold uppercase text-white transition-colors hover:text-white focus:text-white focus:bg-transparent focus:outline-none data-[active]:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-white rounded-none border-b-2 border-transparent hover:border-white data-[state=open]:border-white px-2">
+                            <NavigationMenuTrigger className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:bg-transparent focus:outline-none data-[active]:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-white rounded-none border-b-2 border-transparent hover:border-white data-[state=open]:border-white px-3 tracking-wide">
                               {item.label}
                             </NavigationMenuTrigger>
                             <NavigationMenuContent className="w-full bg-white p-6 shadow-lg">
@@ -235,7 +241,7 @@ export function Header() {
                                     <Link
                                       key={child}
                                       href="#"
-                                      className="text-sm text-zinc-600 hover:text-primary transition-colors uppercase whitespace-nowrap"
+                                      className="text-sm text-zinc-600 hover:text-primary transition-colors uppercase whitespace-nowrap font-medium"
                                     >
                                       {child}
                                     </Link>
@@ -243,37 +249,13 @@ export function Header() {
                                 </div>
                                 
                                 {/* Featured Product */}
-                                <div className="w-[300px] flex-shrink-0 border-l pl-8">
-                                  <div className="flex flex-col gap-4">
-                                    <div className="relative aspect-square w-full overflow-hidden rounded-md bg-zinc-100">
-                                      <img
-                                        src="https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=600&auto=format&fit=crop"
-                                        alt="Destaque"
-                                        className="h-full w-full object-cover"
-                                      />
-                                      <div className="absolute bottom-0 left-0 right-0 bg-zinc-800/80 py-2 text-center text-xs font-bold text-white">
-                                        DESTAQUE
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <h3 className="text-sm font-bold text-zinc-800 line-clamp-2">
-                                        PARAFUSADEIRA/FURADEIRA 20V 2 BAT DCD7781D2BR DEWALT
-                                      </h3>
-                                      <div className="mt-2">
-                                        <span className="text-xl font-bold text-primary">R$ 1.250,90</span>
-                                        <p className="text-xs text-zinc-500">
-                                          R$ 1.125,81 à vista com desconto ou 10x R$ 125,09 Sem juros
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                <HeaderFeaturedProduct />
                               </div>
                             </NavigationMenuContent>
                           </>
                         ) : (
                           <Link href={item.route} legacyBehavior passHref>
-                            <NavigationMenuLink className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-base font-semibold uppercase text-white transition-colors hover:text-white focus:text-white focus:outline-none relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100">
+                            <NavigationMenuLink className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:outline-none relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100 px-3 tracking-wide">
                               {item.label}
                             </NavigationMenuLink>
                           </Link>

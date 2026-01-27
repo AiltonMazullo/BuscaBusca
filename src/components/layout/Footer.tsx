@@ -11,7 +11,6 @@ export function Footer() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-lg font-bold text-primary">Busca Busca</span>
-              <span className="text-xs text-zinc-500">Loja Virtual</span>
             </div>
           </div>
           <p className="max-w-xs text-sm text-zinc-500">

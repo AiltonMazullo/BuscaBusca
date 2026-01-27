@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Busca Busca",
@@ -14,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body className={`${montserrat.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

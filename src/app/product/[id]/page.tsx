@@ -101,6 +101,22 @@ export default async function ProductPage(props: ProductPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Related Products */}
+      <div className="mt-16">
+        <div className="flex flex-col items-center gap-2 mb-8">
+          <h2 className="text-2xl font-bold text-zinc-800">Produtos Relacionados</h2>
+          <div className="h-1 w-12 rounded-full bg-primary"></div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {products
+            .filter((p) => p.category === product.category && p.id !== product.id)
+            .slice(0, 4)
+            .map((relatedProduct) => (
+              <ProductCard key={relatedProduct.id} product={relatedProduct} />
+            ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -62,7 +62,7 @@ function LoginForm() {
         <div className="mx-auto mb-2 h-16 w-16 overflow-hidden">
           <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
         </div>
-        <h1 className="mt-1 text-xl font-semibold text-zinc-800">Entrar na loja virtual</h1>
+        <h1 className="mt-1 text-xl font-semibold text-zinc-800">Entrar</h1>
         <p className="mt-1 text-xs text-zinc-500">Acesse sua conta para finalizar suas compras.</p>
       </div>
       {errors.form && <p className="mb-3 text-xs text-red-500">{errors.form}</p>}
