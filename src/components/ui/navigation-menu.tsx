@@ -71,8 +71,6 @@ const navigationMenuTriggerStyle = cva(
     "hover:after:scale-x-100 data-[state=open]:after:scale-x-100"
 )
 
-
-
 function NavigationMenuTrigger({
   className,
   children,

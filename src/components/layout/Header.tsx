@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { Bus, Search, User, ShoppingCart, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import router from "next/router";
 
 import {
   NavigationMenu,
