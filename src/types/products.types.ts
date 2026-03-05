@@ -1,13 +1,13 @@
-// src/types/products.types.ts
 export interface Product {
   id: number;
   name: string;
   description: string;
   price: number;
   photos: string[];
-  isFeatured?: boolean;
   category?: string;
+  isFeatured?: boolean;
 }
 
-export type CreateProductRequest = Omit<Product, "id"> & { id?: number };
-export type UpdateProductRequest = Omit<Product, "id">;
+export type CreateProductRequest = Omit<Product, "id">;
+
+export type UpdateProductRequest = Partial<Omit<Product, "id">>;

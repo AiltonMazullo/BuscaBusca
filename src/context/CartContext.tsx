@@ -1,16 +1,30 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
-import { CartItem, Product } from "@/types";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  ReactNode,
+} from "react";
+import type { Product } from "@/types/products.types";
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
 
 interface CartContextValue {
   items: CartItem[];
   totalAmount: number;
   totalQuantity: number;
   isOpen: boolean;
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+
+  addToCart: (product: Product, qty?: number) => void;
+  removeFromCart: (productId: number) => void;
+  updateQuantity: (productId: number, quantity: number) => void;
+
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -25,58 +39,74 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
+  // hydrate
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     const stored = window.localStorage.getItem(CART_STORAGE_KEY);
     if (!stored) return;
+
     try {
       const parsed = JSON.parse(stored) as CartItem[];
-      setItems(parsed);
+      // garante que não vem lixo
+      if (Array.isArray(parsed)) setItems(parsed);
     } catch {
       setItems([]);
     }
   }, []);
 
+  // persist
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
   const totalAmount = useMemo(() => {
-    return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return items.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0,
+    );
   }, [items]);
 
   const totalQuantity = useMemo(() => {
     return items.reduce((total, item) => total + item.quantity, 0);
   }, [items]);
 
-  function addToCart(product: Product) {
-    setItems(current => {
-      const existing = current.find(item => item.product.id === product.id);
+  function addToCart(product: Product, qty: number = 1) {
+    const amount = Number.isFinite(qty) ? Math.max(1, Math.floor(qty)) : 1;
+
+    setItems((current) => {
+      const existing = current.find((item) => item.product.id === product.id);
+
       if (existing) {
-        return current.map(item =>
+        return current.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + amount }
             : item,
         );
       }
-      return [...current, { product, quantity: 1 }];
+
+      return [...current, { product, quantity: amount }];
     });
+
     setIsOpen(true);
   }
 
-  function removeFromCart(productId: string) {
-    setItems(current => current.filter(item => item.product.id !== productId));
+  function removeFromCart(productId: number) {
+    setItems((current) => current.filter((item) => item.product.id !== productId));
   }
 
-  function updateQuantity(productId: string, quantity: number) {
-    if (quantity <= 0) {
+  function updateQuantity(productId: number, quantity: number) {
+    const q = Number.isFinite(quantity) ? Math.floor(quantity) : 1;
+
+    if (q <= 0) {
       removeFromCart(productId);
       return;
     }
-    setItems(current =>
-      current.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item,
+
+    setItems((current) =>
+      current.map((item) =>
+        item.product.id === productId ? { ...item, quantity: q } : item,
       ),
     );
   }
@@ -94,7 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function toggleCart() {
-    setIsOpen(current => !current);
+    setIsOpen((current) => !current);
   }
 
   return (
@@ -120,9 +150,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 }
-

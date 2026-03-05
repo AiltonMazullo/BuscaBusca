@@ -8,9 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
-  product: Product & {
-    imageUrl?: string;
-  };
+  product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -18,10 +16,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const [quantity, setQuantity] = React.useState(1);
 
   function handleAdd() {
-    for (let i = 0; i < quantity; i++) {}
+    for (let i = 0; i < quantity; i++) addToCart(product);
   }
 
-  const imageSrc = product.photos || product.imageUrl || "/logo.svg";
+  const imageSrc =
+    product.photos?.[0] && product.photos[0].trim()
+      ? product.photos[0]
+      : "/logo.svg";
 
   return (
     <Card className="group relative flex flex-col overflow-hidden rounded-none border-none bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-4">
@@ -33,23 +34,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
+          {/* ✅ todas as imagens com o MESMO tamanho */}
           <img
             src={imageSrc}
             alt={product.name}
-            className="h-full w-full object-contain p-0 transition-transform duration-300 ease-out md:group-hover:scale-105"
+            className="h-full w-full object-cover"
           />
         </Link>
-
-        <div className="absolute bottom-2 left-0 hidden w-full justify-center gap-1 px-2 sm:flex">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-green-500 text-[6px] font-bold text-white"
-            >
-              ICON
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
@@ -57,6 +48,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-normal text-zinc-600 uppercase">
             {product.name}
           </h3>
+
+          {!!product.category && (
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+              {product.category}
+            </p>
+          )}
         </Link>
 
         <div className="mt-auto flex flex-col gap-1 pt-2">
@@ -92,8 +89,8 @@ export function ProductCard({ product }: ProductCardProps) {
               min={1}
               value={quantity}
               onChange={(e) => {
-                const value = Number(e.target.value);
-                setQuantity(Number.isFinite(value) ? Math.max(1, value) : 1);
+                const v = Number(e.target.value);
+                setQuantity(Number.isFinite(v) ? Math.max(1, v) : 1);
               }}
               className="w-10 bg-transparent text-center text-sm font-semibold text-zinc-700 outline-none"
             />

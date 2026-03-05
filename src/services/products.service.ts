@@ -6,31 +6,44 @@ import type {
   UpdateProductRequest,
 } from "@/types/products.types";
 
+type ApiProduct = Omit<Product, "photos"> & { photos: string | string[] };
+
+function normalizeProduct(p: ApiProduct): Product {
+  return {
+    ...p,
+    photos: Array.isArray(p.photos) ? p.photos : p.photos ? [p.photos] : [],
+  };
+}
+
 export const productsService = {
-  async list() {
-    const { data } = await api.get<Product[]>("/products");
-    return data;
+  async list(): Promise<Product[]> {
+    const { data } = await api.get<ApiProduct[]>("/products");
+    return data.map(normalizeProduct);
   },
 
-  async create(payload: CreateProductRequest) {
-    const { data } = await api.post<Product>("/products", payload);
-    return data;
+  async listByCategory(category: string): Promise<Product[]> {
+    const { data } = await api.get<ApiProduct[]>(
+      `/products/category/${encodeURIComponent(category)}`,
+    );
+    return data.map(normalizeProduct);
   },
 
-  async update(id: number | string, payload: UpdateProductRequest) {
-    const { data } = await api.put<Product>(`/products/${id}`, payload);
-    return data;
+  async getById(id: number): Promise<Product> {
+    const { data } = await api.get<ApiProduct>(`/products/${id}`);
+    return normalizeProduct(data);
   },
 
-  async remove(id: number | string) {
+  async create(payload: CreateProductRequest): Promise<Product> {
+    const { data } = await api.post<ApiProduct>("/products", payload);
+    return normalizeProduct(data);
+  },
+
+  async update(id: number, payload: UpdateProductRequest): Promise<Product> {
+    const { data } = await api.put<ApiProduct>(`/products/${id}`, payload);
+    return normalizeProduct(data);
+  },
+
+  async remove(id: number): Promise<void> {
     await api.delete(`/products/${id}`);
-  },
-
-  async getById(id: number) {
-    // se sua API não tiver GET /products/:id
-    const all = await this.list();
-    const found = all.find((p) => p.id === id);
-    if (!found) throw new Error("Product not found");
-    return found;
   },
 };

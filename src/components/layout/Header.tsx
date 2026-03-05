@@ -12,12 +12,10 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/hooks/useAuth";
 
-const MENU_ITEMS = [
+export const MENU_ITEMS = [
   {
     label: "Eletrônicos",
     route: "/category/eletronicos",
@@ -87,7 +85,6 @@ function HeaderFeaturedProduct() {
             </p>
           </div>
 
-          {/* Hover Controls */}
           <div className="mt-4 flex gap-2 transition-all duration-300 md:opacity-0 md:-translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto">
             <div className="flex h-10 w-[112px] items-stretch overflow-hidden rounded bg-zinc-100">
               <button
@@ -190,7 +187,6 @@ export function Header() {
               isScrolled ? "py-2" : "py-6"
             }`}
           >
-            {/* Logo */}
             <Link href="/" className="flex flex-shrink-0 items-center gap-2">
               <div
                 className={`overflow-hidden transition-all duration-300 ${
@@ -214,7 +210,6 @@ export function Header() {
               </div>
             </Link>
 
-            {/* Search Bar */}
             <div className="hidden flex-1 items-center rounded-md bg-zinc-100 px-4 py-3 text-sm text-zinc-700 sm:flex">
               <input
                 type="text"
@@ -224,7 +219,6 @@ export function Header() {
               <Search size={16} className="text-primary" />
             </div>
 
-            {/* User & Cart */}
             <div className="flex items-center gap-6">
               {!isAuthenticated ? (
                 <Link
@@ -285,26 +279,42 @@ export function Header() {
 
           {/* Navigation Bar */}
           <div className="w-full bg-primary text-white">
-            <div className="mx-auto max-w-[1280px] px-4">
-              {/* Desktop Navigation */}
-              <div className="hidden md:block">
-                <NavigationMenu className="max-w-full justify-start">
-                  <NavigationMenuList className="gap-4">
-                    {MENU_ITEMS.map((item) => (
-                      <NavigationMenuItem key={item.label}>
-                        <Link href={item.route} passHref>
-                          <NavigationMenuLink className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:outline-none relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100 px-3 tracking-wide">
-                            {item.label}
-                          </NavigationMenuLink>
-                        </Link>
-                      </NavigationMenuItem>
-                    ))}
-                  </NavigationMenuList>
-                </NavigationMenu>
+            <div className="mx-auto max-w-[1280px] px-0 md:px-4">
+              <div className="w-full bg-primary text-white">
+                <div className="mx-auto max-w-[1280px] px-0 md:px-4">
+                  {/* Desktop Navigation */}
+                  <div className="hidden md:block">
+                    <NavigationMenu className="w-full max-w-full">
+                      <NavigationMenuList className="flex w-full items-center justify-between">
+                        {MENU_ITEMS.map((item) => (
+                          <NavigationMenuItem key={item.label}>
+                            <Link href={item.route}>
+                              <NavigationMenuLink
+                                className={[
+                                  "group relative inline-flex h-14 items-center justify-center",
+                                  "bg-transparent text-[11px] font-bold uppercase text-white",
+                                  "tracking-wide transition-colors",
+                                  "hover:bg-white/10 focus:bg-white/10",
+                                  "focus:outline-none",
+                                  "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full",
+                                  "after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300",
+                                  "hover:after:scale-x-100",
+                                  "px-4",
+                                ].join(" ")}
+                              >
+                                {item.label}
+                              </NavigationMenuLink>
+                            </Link>
+                          </NavigationMenuItem>
+                        ))}
+                      </NavigationMenuList>
+                    </NavigationMenu>
+                  </div>
+                </div>
               </div>
 
               {/* Mobile Navigation (Scrollable) */}
-              <div className="flex w-full items-center gap-6 overflow-x-auto py-3 md:hidden no-scrollbar">
+              <div className="flex w-full items-center gap-6 overflow-x-auto py-3 md:hidden no-scrollbar px-4">
                 {MENU_ITEMS.map((item) => (
                   <Link
                     key={item.label}

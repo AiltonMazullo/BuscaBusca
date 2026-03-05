@@ -1,48 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { productsService } from "@/services/products.service";
-import { ProductCard } from "@/components/ProductCard";
 import { BenefitsBar } from "@/components/BenefitsBar";
-import { slugify } from "@/utils/utils";
+import { ProductCard } from "@/components/ProductCard";
+import { productsService } from "@/services/products.service";
 import type { Product } from "@/types/products.types";
 import Link from "next/link";
 
 interface CategoryPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
-function getProductSlugCategory(p: Product): string | null {
-  // se sua API futuramente tiver category, já funciona
-  const anyP = p as Product & { category?: string };
-  if (anyP.category) return slugify(anyP.category);
-
-  // fallback (não ideal): tenta categorizar pelo nome (você pode ajustar depois)
-  return slugify(p.name);
+function titleFromSlug(slug: string) {
+  if (!slug) return "Categoria";
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default async function CategoryPage(props: CategoryPageProps) {
-  const { id: categorySlug } = await props.params;
+  const { id } = await props.params;
+  const categorySlug = id;
 
   let products: Product[] = [];
+
   try {
-    products = await productsService.list();
+    products = await productsService.listByCategory(categorySlug);
   } catch {
     products = [];
   }
 
-  const showAll =
-    categorySlug === "todos" ||
-    categorySlug === "produtos" ||
-    categorySlug === "";
-
-  const categoryProducts = showAll
-    ? products
-    : products.filter((p) => getProductSlugCategory(p) === categorySlug);
-
-  const categoryName = showAll
-    ? "Todos os Produtos"
-    : ((categoryProducts[0] as any)?.category ?? categorySlug);
+  const categoryName =
+    products.length > 0
+      ? (products[0].category ?? titleFromSlug(categorySlug))
+      : titleFromSlug(categorySlug);
 
   return (
     <div className="flex flex-col gap-8 pb-8">
@@ -55,14 +41,14 @@ export default async function CategoryPage(props: CategoryPageProps) {
           </h1>
           <div className="h-1 w-12 rounded-full bg-primary" />
           <p className="text-sm text-zinc-500">
-            {categoryProducts.length} produtos encontrados
+            {products.length} produto(s) encontrado(s)
           </p>
         </div>
 
-        {categoryProducts.length > 0 ? (
+        {products.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {categoryProducts.map((product) => (
-              <ProductCard key={String(product.id)} product={product as any} />
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
@@ -70,9 +56,6 @@ export default async function CategoryPage(props: CategoryPageProps) {
             <p className="text-lg font-medium text-zinc-500">
               Nenhum produto encontrado nesta categoria.
             </p>
-            <Link href="/" className="text-primary hover:underline">
-              Voltar para Home
-            </Link>
           </div>
         )}
       </section>

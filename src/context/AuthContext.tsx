@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  createContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-
 import { authService } from "@/services/auth.service";
-import type { AuthResponse, User } from "@/types/auth.types";
+import type { User, AuthResponse } from "@/types/auth.types";
 
 interface AuthContextType {
   user: User | null;
@@ -25,7 +18,6 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  hydrate: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -35,41 +27,35 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 const AUTH_USER_STORAGE_KEY = "@buscabusca:user";
 const AUTH_TOKEN_STORAGE_KEY = "@buscabusca:token";
 
+function safeParseUser(raw: string | null): User | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as User;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
-  const hydrate = () => {
-    if (typeof window === "undefined") return;
 
-    const storedUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
-    const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === "undefined") return null;
+    return safeParseUser(localStorage.getItem(AUTH_USER_STORAGE_KEY));
+  });
 
-    // token
-    setToken(storedToken ?? null);
-
-    // user
-    if (!storedUser) {
-      setUser(null);
-      return;
-    }
-
-    try {
-      setUser(JSON.parse(storedUser) as User);
-    } catch {
-      setUser(null);
-    }
-  };
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  });
 
   const persistSession = (session: AuthResponse) => {
     setUser(session.user);
     setToken(session.token);
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(session.user));
-      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
-    }
+    localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(session.user));
+    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
   };
 
   const login = async (email: string, password: string) => {
@@ -91,18 +77,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
 
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(AUTH_USER_STORAGE_KEY);
-      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-    }
+    localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
 
-    router.replace("/login");
+    router.push("/login");
   };
 
   const isAuthenticated = !!user && !!token;
 
   const isAdmin = useMemo(() => {
-    return (user?.role ?? "").toLowerCase() === "admin";
+    const role = (user?.role ?? "").toString().toLowerCase();
+    return role === "admin";
   }, [user]);
 
   return (
@@ -115,7 +100,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isAuthenticated,
         isAdmin,
-        hydrate,
       }}
     >
       {children}

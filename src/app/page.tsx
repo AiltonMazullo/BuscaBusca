@@ -1,14 +1,30 @@
-import { productsService } from "@/services/products.service";
 import { ProductCard } from "@/components/ProductCard";
 import { BenefitsBar } from "@/components/BenefitsBar";
+import { productsService } from "@/services/products.service";
 import type { Product } from "@/types/products.types";
+import { MENU_ITEMS } from "@/components/layout/Header";
+
+function slugFromRoute(route: string) {
+  return route.split("/").pop() ?? route;
+}
 
 export default async function Home() {
   let products: Product[] = [];
 
   try {
-    products = await productsService.list();
-  } catch (err) {
+    const slugs = MENU_ITEMS.map((i) => slugFromRoute(i.route));
+
+    const lists = await Promise.all(
+      slugs.map((slug) => productsService.listByCategory(slug)),
+    );
+
+    const flat = lists.flat();
+
+    // remove duplicados por id
+    const map = new Map<number, Product>();
+    for (const p of flat) map.set(p.id, p);
+    products = Array.from(map.values());
+  } catch {
     products = [];
   }
 

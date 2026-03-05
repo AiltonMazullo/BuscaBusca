@@ -6,24 +6,31 @@ import { productsService } from "@/services/products.service";
 import { Boxes, Plus, Trash2, Pencil, X, ImagePlus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { MENU_ITEMS } from "@/components/layout/Header";
 
 type ProductForm = {
   name: string;
   description: string;
   price: number;
-  photos: string[]; // <= até 5 imagens em base64
-  isFeatured?: boolean; // (opcional) se seu front usa, mas API ignora
+  category: string;
+  photos: string[];
+  isFeatured?: boolean;
 };
-
-const MAX_IMAGES = 5;
 
 const emptyForm: ProductForm = {
   name: "",
   description: "",
   price: 0,
+  category: "",
   photos: [],
   isFeatured: false,
 };
+
+const MAX_IMAGES = 5;
+
+function slugFromRoute(route: string) {
+  return route.replace("/category/", "");
+}
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -92,6 +99,7 @@ export default function AdminProductsPage() {
 
     if (!form.name.trim()) return setError("Nome é obrigatório.");
     if (!form.description.trim()) return setError("Descrição é obrigatória.");
+    if (!form.category.trim()) return setError("Selecione uma categoria."); // ✅
     if (form.photos.length === 0)
       return setError("Selecione ao menos 1 imagem.");
     if (Number.isNaN(form.price) || form.price <= 0)
@@ -100,26 +108,21 @@ export default function AdminProductsPage() {
     try {
       setIsSaving(true);
 
-      const coverBase64 = form.photos;
+      // photos é array (API aceita array agora pelo swagger que você mandou)
+      const payload = {
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        category: form.category, // ✅
+        photos: form.photos, // ✅
+      };
 
       if (editingId !== null) {
-        const updated = await productsService.update(editingId, {
-          name: form.name,
-          description: form.description,
-          price: form.price,
-          photos: coverBase64,
-        });
-
+        const updated = await productsService.update(editingId, payload);
         setItems((prev) => prev.map((p) => (p.id === editingId ? updated : p)));
         setEditingId(null);
       } else {
-        const created = await productsService.create({
-          name: form.name,
-          description: form.description,
-          price: form.price,
-          photos: coverBase64,
-        });
-
+        const created = await productsService.create(payload);
         setItems((prev) => [created, ...prev]);
       }
 
@@ -148,13 +151,16 @@ export default function AdminProductsPage() {
 
   function startEdit(p: Product) {
     setEditingId(p.id);
+
     setForm({
       name: p.name,
       description: p.description,
       price: p.price,
-      photos: p.photos ? p.photos : [],
-      isFeatured: false,
+      category: p.category ?? "",
+      photos: Array.isArray(p.photos) ? p.photos : [],
+      isFeatured: p.isFeatured ?? false,
     });
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -208,6 +214,42 @@ export default function AdminProductsPage() {
             />
             Destaque
           </label>
+
+          {/* ── Select de categoria ── */}
+          <div className="md:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-zinc-700">
+              Categoria
+            </label>
+            <select
+              value={form.category}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, category: e.target.value }))
+              }
+              className={[
+                "w-full rounded-md border px-3 py-2 text-sm outline-none transition",
+
+                "focus:border-primary",
+
+                form.category
+                  ? "border-zinc-300 text-zinc-800"
+                  : "border-zinc-300 text-zinc-400",
+              ].join(" ")}
+            >
+              <option value="" disabled>
+                Selecione uma categoria…
+              </option>
+
+              {MENU_ITEMS.map((item) => {
+                const slug = slugFromRoute(item.route);
+
+                return (
+                  <option key={slug} value={slug}>
+                    {item.label}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
 
           <textarea
             value={form.description}
@@ -373,7 +415,7 @@ export default function AdminProductsPage() {
                       }).format(p.price)}
                     </td>
 
-                    <td className="px-4 py-3 flex items-center gap-2 text-zinc-700">
+                    <td className="px-4 py-3">
                       {p.photos &&
                         p.photos.length > 0 &&
                         p.photos.map((photo, index) => (
