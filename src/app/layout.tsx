@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
+
 
 const montserrat = Montserrat({
   subsets: ["latin"],

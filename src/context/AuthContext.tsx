@@ -1,108 +1,124 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User } from "@/types";
+import {
+  createContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
+
+import { authService } from "@/services/auth.service";
+import type { AuthResponse, User } from "@/types/auth.types";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string) => Promise<void>;
-  register: (name: string, email: string) => Promise<void>;
+  token: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role?: string,
+  ) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  hydrate: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
-const AUTH_USER_STORAGE_KEY = "busca_busca_user";
-const AUTH_COOKIE_NAME = "busca_busca_auth";
-
-function setAuthCookie(isLoggedIn: boolean) {
-  if (typeof document === "undefined") return;
-  if (isLoggedIn) {
-    const maxAge = 7 * 24 * 60 * 60;
-    document.cookie = `${AUTH_COOKIE_NAME}=true; path=/; max-age=${maxAge}`;
-  } else {
-    document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0`;
-  }
-}
+const AUTH_USER_STORAGE_KEY = "@buscabusca:user";
+const AUTH_TOKEN_STORAGE_KEY = "@buscabusca:token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  const hydrate = () => {
     if (typeof window === "undefined") return;
-    const storedUser = window.localStorage.getItem(AUTH_USER_STORAGE_KEY);
-    if (!storedUser) return;
+
+    const storedUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+
+    // token
+    setToken(storedToken ?? null);
+
+    // user
+    if (!storedUser) {
+      setUser(null);
+      return;
+    }
+
     try {
-      const parsed = JSON.parse(storedUser) as User;
-      setUser(parsed);
+      setUser(JSON.parse(storedUser) as User);
     } catch {
       setUser(null);
     }
-  }, []);
+  };
 
-  const login = async (email: string) => {
-    const mockUser: User = {
-      id: "1",
-      name: "Usuario Teste",
-      email: email,
-    };
+  const persistSession = (session: AuthResponse) => {
+    setUser(session.user);
+    setToken(session.token);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setUser(mockUser);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(mockUser));
-      setAuthCookie(true);
+      localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(session.user));
+      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
     }
   };
 
-  const register = async (name: string, email: string) => {
-    const mockUser: User = {
-      id: "1",
-      name: name,
-      email: email,
-    };
+  const login = async (email: string, password: string) => {
+    const session = await authService.login({ email, password });
+    persistSession(session);
+  };
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setUser(mockUser);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(mockUser));
-      setAuthCookie(true);
-    }
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    role = "user",
+  ) => {
+    const session = await authService.register({ name, email, password, role });
+    persistSession(session);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
+
     if (typeof window !== "undefined") {
-      window.localStorage.removeItem(AUTH_USER_STORAGE_KEY);
-      setAuthCookie(false);
+      localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
     }
-    router.push("/login");
+
+    router.replace("/login");
   };
+
+  const isAuthenticated = !!user && !!token;
+
+  const isAdmin = useMemo(() => {
+    return (user?.role ?? "").toLowerCase() === "admin";
+  }, [user]);
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        token,
         login,
         register,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated,
+        isAdmin,
+        hydrate,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 }

@@ -1,13 +1,15 @@
+// src/app/(auth)/login/page.tsx
 "use client";
-
 import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
-import { loginSchema, type LoginFormValues } from "@/lib/schemas";  
-import { useAuth } from "@/context/AuthContext";
+import { loginSchema, type LoginFormValues } from "@/lib/schemas";
+import { useAuth } from "@/hooks/useAuth";
 
-type LoginErrors = Partial<Record<keyof LoginFormValues, string>> & { form?: string };
+type LoginErrors = Partial<Record<keyof LoginFormValues, string>> & {
+  form?: string;
+};
 
 function LoginForm() {
   const { login } = useAuth();
@@ -15,16 +17,21 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
 
-  const [values, setValues] = useState<LoginFormValues>({ email: "", password: "" });
+  const [values, setValues] = useState<LoginFormValues>({
+    email: "",
+    password: "",
+  });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
-    setValues(current => ({ ...current, [name]: value }));
+    setValues((current) => ({ ...current, [name]: value }));
   }
 
-  function parseValidationErrors(error: z.ZodError<LoginFormValues>): LoginErrors {
+  function parseValidationErrors(
+    error: z.ZodError<LoginFormValues>,
+  ): LoginErrors {
     const fieldErrors: LoginErrors = {};
     for (const issue of error.issues) {
       const field = issue.path[0] as keyof LoginFormValues | undefined;
@@ -47,7 +54,7 @@ function LoginForm() {
 
     try {
       setIsSubmitting(true);
-      await login(parsed.data.email);
+      await login(parsed.data.email, parsed.data.password);
       router.push(redirectTo || "/");
     } catch {
       setErrors({ form: "Erro ao fazer login. Tente novamente." });
@@ -60,12 +67,20 @@ function LoginForm() {
     <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
       <div className="mb-6 text-center">
         <div className="mx-auto mb-2 h-16 w-16 overflow-hidden">
-          <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
+          <img
+            src="/logo.svg"
+            alt="Busca Busca Logo"
+            className="h-full w-full object-contain"
+          />
         </div>
         <h1 className="mt-1 text-xl font-semibold text-zinc-800">Entrar</h1>
-        <p className="mt-1 text-xs text-zinc-500">Acesse sua conta para finalizar suas compras.</p>
+        <p className="mt-1 text-xs text-zinc-500">
+          Acesse sua conta para finalizar suas compras.
+        </p>
       </div>
-      {errors.form && <p className="mb-3 text-xs text-red-500">{errors.form}</p>}
+      {errors.form && (
+        <p className="mb-3 text-xs text-red-500">{errors.form}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1">
           <label htmlFor="email" className="text-xs font-medium text-zinc-700">
@@ -80,11 +95,16 @@ function LoginForm() {
             className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-primary/40 focus:border-primary focus:ring-2"
             placeholder="seuemail@exemplo.com"
           />
-          {errors.email && <p className="text-[11px] text-red-500">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-[11px] text-red-500">{errors.email}</p>
+          )}
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-xs font-medium text-zinc-700">
+          <label
+            htmlFor="password"
+            className="text-xs font-medium text-zinc-700"
+          >
             Senha
           </label>
           <input
@@ -96,7 +116,9 @@ function LoginForm() {
             className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none ring-primary/40 focus:border-primary focus:ring-2"
             placeholder="Mínimo de 6 caracteres"
           />
-          {errors.password && <p className="text-[11px] text-red-500">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-[11px] text-red-500">{errors.password}</p>
+          )}
         </div>
 
         <button
@@ -121,10 +143,15 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
-      <Suspense fallback={<div className="text-center text-zinc-500">Carregando formulário...</div>}>
+      <Suspense
+        fallback={
+          <div className="text-center text-zinc-500">
+            Carregando formulário...
+          </div>
+        }
+      >
         <LoginForm />
       </Suspense>
     </div>
   );
 }
-
