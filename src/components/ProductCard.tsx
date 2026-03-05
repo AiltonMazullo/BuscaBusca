@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Product } from "@/types";
+import type { Product } from "@/types/products.types";
 import { useCart } from "@/context/CartContext";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & {
+    imageUrl?: string;
+  };
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -16,26 +18,28 @@ export function ProductCard({ product }: ProductCardProps) {
   const [quantity, setQuantity] = React.useState(1);
 
   function handleAdd() {
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
+    for (let i = 0; i < quantity; i++) {}
   }
+
+  const imageSrc = product.photos || product.imageUrl || "/logo.svg";
 
   return (
     <Card className="group relative flex flex-col overflow-hidden rounded-none border-none bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-4">
       <div className="relative mb-3 aspect-square w-full bg-zinc-50 sm:mb-4">
         <Link href={`/product/${product.id}`} className="block h-full w-full">
-            {product.isFeatured && (
+          {product.isFeatured && (
             <div className="absolute bottom-0 left-0 right-0 z-10 bg-zinc-700 py-1 text-center text-[10px] font-bold uppercase text-white">
-                DESTAQUE
+              DESTAQUE
             </div>
-            )}
-            <img 
-                src={product.imageUrl} 
-                alt={product.name} 
-                className="h-full w-full object-contain p-0 transition-transform duration-300 ease-out md:group-hover:scale-105" 
-            />
+          )}
+
+          <img
+            src={imageSrc}
+            alt={product.name}
+            className="h-full w-full object-contain p-0 transition-transform duration-300 ease-out md:group-hover:scale-105"
+          />
         </Link>
+
         <div className="absolute bottom-2 left-0 hidden w-full justify-center gap-1 px-2 sm:flex">
           {[1, 2, 3, 4].map((i) => (
             <div
@@ -47,20 +51,28 @@ export function ProductCard({ product }: ProductCardProps) {
           ))}
         </div>
       </div>
-      
+
       <div className="flex flex-1 flex-col gap-1">
         <Link href={`/product/${product.id}`} className="hover:text-primary">
-            <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-normal text-zinc-600 uppercase">
-                {product.name}
-            </h3>
+          <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-normal text-zinc-600 uppercase">
+            {product.name}
+          </h3>
         </Link>
-        
+
         <div className="mt-auto flex flex-col gap-1 pt-2">
           <span className="text-xl font-bold text-zinc-900">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(product.price)}
           </span>
+
           <span className="text-xs text-zinc-500">
-             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price * 0.9)} à vista com desconto
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(product.price * 0.9)}{" "}
+            à vista com desconto
           </span>
         </div>
 
