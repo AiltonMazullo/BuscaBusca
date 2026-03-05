@@ -4,7 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { Trash2, ShoppingCart } from "lucide-react";
-// import { formatPrice } from "@/lib/utils";
+import { Product } from "@/types/products.types";
+
+interface ProductCardProps {
+  product: Product;
+}
 
 export function CartDrawer() {
   const { items, totalAmount, isOpen, closeCart, removeFromCart } = useCart();
@@ -14,6 +18,11 @@ export function CartDrawer() {
     closeCart();
     router.push("/checkout");
   }
+
+  // const imageSrc =
+  //   product.photos?.[0] && product.photos[0].trim()
+  //     ? product.photos[0]
+  //     : "/logo.svg";
 
   return (
     <AnimatePresence>
@@ -63,11 +72,11 @@ export function CartDrawer() {
                     className="flex gap-3 border-b border-zinc-100 pb-4 last:border-b-0"
                   >
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-zinc-50">
-                      <img
-                        src={item.product.imageUrl}
-                        alt={item.product.name}
+                      {/* <img
+                        src={imageSrc}
+                        alt={item.product}
                         className="h-full w-full object-contain"
-                      />
+                      /> */}
                     </div>
                     <div className="flex flex-1 flex-col justify-between text-sm">
                       <div className="flex items-start justify-between gap-2">

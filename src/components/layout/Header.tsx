@@ -48,7 +48,7 @@ function HeaderFeaturedProduct() {
 
   const handleAdd = () => {
     for (let i = 0; i < quantity; i++) {
-      addToCart(product);
+      // addToCart(product);
     }
   };
 

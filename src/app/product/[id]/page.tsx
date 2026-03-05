@@ -39,7 +39,6 @@ export default async function ProductPage(props: ProductPageProps) {
   const installmentPrice = product.price / 10;
   const cashPrice = product.price * 0.9;
 
-  // ✅ breadcrumb de categoria (se existir). Se não existir na API, não mostra.
   const anyP = product as Product & {
     category?: string;
     isFeatured?: boolean;
@@ -48,9 +47,6 @@ export default async function ProductPage(props: ProductPageProps) {
   const categoryName = anyP.category ?? null;
   const categorySlug = categoryName ? slugify(categoryName) : null;
 
-  // ✅ related products:
-  // - se tiver category: filtra por category
-  // - se não tiver: pega outros produtos excluindo o atual
   const related = categoryName
     ? products
         .filter((p) => {
@@ -60,7 +56,6 @@ export default async function ProductPage(props: ProductPageProps) {
         .slice(0, 4)
     : products.filter((p) => String(p.id) !== String(product.id)).slice(0, 4);
 
-  // ✅ imagem: base64 (photos). fallback pra imageUrl se ainda existir em algum lugar.
   const imageSrc = product.photos[0] || anyP.imageUrl || "/logo.svg";
 
   return (
