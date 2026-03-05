@@ -18,62 +18,19 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 const MENU_ITEMS = [
-  { label: "AR E VENTILAÇÃO", route: "/category/ar-e-ventilacao" },
   {
-    label: "AQUECIMENTO ELÉTRICO",
-    route: "/category/aquecimento-eletrico",
-    children: ["Duchas e Chuveiros", "Aquecedor", "Resistencia"],
-  },
-  { label: "BOMBAS E MOTOBOMBAS", route: "/category/bombas-e-motobombas" },
-  { label: "CAIXAS", route: "/category/caixas" },
-  {
-    label: "ESCADAS",
-    route: "/category/escadas",
-    children: ["Escada de Fibra", "Escada de aluminio"],
+    label: "Eletrônicos",
+    route: "/category/eletronicos",
   },
   {
-    label: "FERRAMENTAS",
+    label: "Calçados",
+    route: "/category/calcados",
+  },
+  {
+    label: "Ferramentas",
     route: "/category/ferramentas",
-    children: ["Chaves", "Bolsas", "Torno"],
   },
-  {
-    label: "FERRAMENTAS ELÉTRICAS",
-    route: "/category/ferramentas-eletricas",
-    children: [
-      "APARADOR",
-      "CARREGADOR/BATERIA",
-      "CHAVE DE IMPACTO",
-      "COMPRESSOR",
-      "ESMERILHADEIRA",
-      "FURADEIRA",
-      "LAVADORA",
-      "LIXADEIRA",
-      "NIVEL",
-      "PARAFUSADEIRA",
-      "PINTURA",
-      "ROÇADEIRA",
-      "RETIFICA",
-      "SERRA",
-      "SOPRADOR TÉRMICO",
-      "SOPRADOR/ASPIRADOR",
-      "TRENA",
-      "TUPIA",
-      "OSCILANTE",
-    ],
-  },
-  { label: "LÂMPADAS", route: "/category/lampadas" },
-  {
-    label: "+ CATEGORIAS",
-    route: "/category/mais-categorias",
-    children: [
-      "LUMINARIAS",
-      "MATERIAIS ELÉTRICOS",
-      "STANLEY SC",
-      "SEGURANÇA",
-      "SOLDAS EM GERAL",
-      "ZEBU",
-    ],
-  },
+  { label: "Roupas", route: "/category/roupas" },
 ];
 
 function HeaderFeaturedProduct() {
@@ -335,38 +292,11 @@ export function Header() {
                   <NavigationMenuList className="gap-4">
                     {MENU_ITEMS.map((item) => (
                       <NavigationMenuItem key={item.label}>
-                        {item.children ? (
-                          <>
-                            <NavigationMenuTrigger className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:bg-transparent focus:outline-none data-[active]:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-white rounded-none border-b-2 border-transparent hover:border-white data-[state=open]:border-white px-3 tracking-wide">
-                              {item.label}
-                            </NavigationMenuTrigger>
-                            <NavigationMenuContent className="w-full bg-white p-6 shadow-lg">
-                              <div className="flex gap-12 w-[800px] max-w-full">
-                                {/* Categories List */}
-                                <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-3 content-start">
-                                  {item.children.map((child) => (
-                                    <Link
-                                      key={child}
-                                      href="#"
-                                      className="text-sm text-zinc-600 hover:text-primary transition-colors uppercase whitespace-nowrap font-medium"
-                                    >
-                                      {child}
-                                    </Link>
-                                  ))}
-                                </div>
-
-                                {/* Featured Product */}
-                                <HeaderFeaturedProduct />
-                              </div>
-                            </NavigationMenuContent>
-                          </>
-                        ) : (
-                          <Link href={item.route} legacyBehavior passHref>
-                            <NavigationMenuLink className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:outline-none relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100 px-3 tracking-wide">
-                              {item.label}
-                            </NavigationMenuLink>
-                          </Link>
-                        )}
+                        <Link href={item.route} passHref>
+                          <NavigationMenuLink className="group inline-flex h-14 items-center justify-center bg-transparent hover:bg-transparent text-[11px] font-bold uppercase text-white transition-colors hover:text-white focus:text-white focus:outline-none relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100 px-3 tracking-wide">
+                            {item.label}
+                          </NavigationMenuLink>
+                        </Link>
                       </NavigationMenuItem>
                     ))}
                   </NavigationMenuList>

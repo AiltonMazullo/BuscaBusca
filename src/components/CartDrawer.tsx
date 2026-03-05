@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { Trash2 } from "lucide-react";
+import { Trash2, ShoppingCart } from "lucide-react";
 // import { formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
@@ -34,8 +34,11 @@ export function CartDrawer() {
           >
             <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-4">
               <div className="flex items-center gap-2">
-                <span className="text-xl text-primary">🛒</span>
-                <h2 className="text-sm font-semibold text-zinc-800">Carrinho de compras</h2>
+                {/* <span className="text-xl text-primary">🛒</span> */}
+                <ShoppingCart className="text-primary" size={24} />
+                <h2 className="text-sm font-semibold text-zinc-800">
+                  Carrinho de compras
+                </h2>
               </div>
               <button
                 type="button"
@@ -48,12 +51,17 @@ export function CartDrawer() {
 
             <div className="flex-1 overflow-y-auto px-4 py-4">
               {items.length === 0 && (
-                <p className="py-8 text-center text-sm text-zinc-500">Seu carrinho está vazio.</p>
+                <p className="py-8 text-center text-sm text-zinc-500">
+                  Seu carrinho está vazio.
+                </p>
               )}
 
               <ul className="space-y-4">
-                {items.map(item => (
-                  <li key={item.product.id} className="flex gap-3 border-b border-zinc-100 pb-4 last:border-b-0">
+                {items.map((item) => (
+                  <li
+                    key={item.product.id}
+                    className="flex gap-3 border-b border-zinc-100 pb-4 last:border-b-0"
+                  >
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-zinc-50">
                       <img
                         src={item.product.imageUrl}
@@ -125,4 +133,3 @@ export function CartDrawer() {
     </AnimatePresence>
   );
 }
-

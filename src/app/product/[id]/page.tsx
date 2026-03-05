@@ -61,7 +61,7 @@ export default async function ProductPage(props: ProductPageProps) {
     : products.filter((p) => String(p.id) !== String(product.id)).slice(0, 4);
 
   // ✅ imagem: base64 (photos). fallback pra imageUrl se ainda existir em algum lugar.
-  const imageSrc = product.photos || anyP.imageUrl || "/logo.svg";
+  const imageSrc = product.photos[0] || anyP.imageUrl || "/logo.svg";
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8">
@@ -149,10 +149,6 @@ export default async function ProductPage(props: ProductPageProps) {
             <h3 className="font-semibold text-zinc-900">Descrição</h3>
             <p className="leading-relaxed text-zinc-600">
               {product.description}
-            </p>
-            <p className="mt-2 text-sm text-zinc-500">
-              *Imagens meramente ilustrativas. As cores podem variar de acordo
-              com o monitor.
             </p>
           </div>
 
