@@ -8,6 +8,18 @@ export interface Product {
   isFeatured?: boolean;
 }
 
-export type CreateProductRequest = Omit<Product, "id">;
+export type CreateProductRequest = {
+  name: string;
+  description: string;
+  price: number;
+  photos: string[] | string;
+  category?: string;
+};
 
-export type UpdateProductRequest = Partial<Omit<Product, "id">>;
+export type UpdateProductRequest = Partial<{
+  name: string;
+  description: string;
+  price: number;
+  photos: string[] | string;
+  category?: string;
+}>;

@@ -1,32 +1,37 @@
+"use client";
 import { ProductCard } from "@/components/ProductCard";
 import { BenefitsBar } from "@/components/BenefitsBar";
 import { productsService } from "@/services/products.service";
 import type { Product } from "@/types/products.types";
-import { MENU_ITEMS } from "@/components/layout/Header";
+import { useEffect, useState } from "react";
 
 function slugFromRoute(route: string) {
   return route.split("/").pop() ?? route;
 }
 
-export default async function Home() {
-  let products: Product[] = [];
+export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
 
-  try {
-    const slugs = MENU_ITEMS.map((i) => slugFromRoute(i.route));
+  const [isLoading, setIsLoading] = useState(true);
 
-    const lists = await Promise.all(
-      slugs.map((slug) => productsService.listByCategory(slug)),
-    );
+  const [error, setError] = useState<string | null>(null);
 
-    const flat = lists.flat();
-
-    // remove duplicados por id
-    const map = new Map<number, Product>();
-    for (const p of flat) map.set(p.id, p);
-    products = Array.from(map.values());
-  } catch {
-    products = [];
+  async function loadProducts() {
+    setError(null);
+    try {
+      setIsLoading(true);
+      const data = await productsService.list();
+      setProducts(data);
+    } catch {
+      setError("Não foi possível carregar os produtos.");
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   return (
     <div className="flex flex-col gap-8 pb-8">

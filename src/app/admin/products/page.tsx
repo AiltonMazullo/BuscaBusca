@@ -113,8 +113,8 @@ export default function AdminProductsPage() {
         name: form.name,
         description: form.description,
         price: form.price,
-        category: form.category, // ✅
-        photos: form.photos, // ✅
+        category: form.category,
+        photos: form.photos,
       };
 
       if (editingId !== null) {
