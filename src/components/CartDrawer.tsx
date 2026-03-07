@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/CartDrawer.tsx
 "use client";
 
 import { useState } from "react";
@@ -35,6 +36,12 @@ export function CartDrawer() {
 
   async function handleCheckout() {
     if (items.length === 0) return;
+
+    if (!isAuthenticated) {
+      closeCart();
+      router.push(`/login?redirectTo=${encodeURIComponent("/checkout")}`);
+      return;
+    }
 
     try {
       setIsSubmitting(true);

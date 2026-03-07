@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -10,11 +11,16 @@ function formatDate(value?: string) {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("pt-BR").format(d);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(d);
 }
 
 function formatMoney(value?: number) {
   if (typeof value !== "number") return "—";
+
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -22,10 +28,18 @@ function formatMoney(value?: number) {
 }
 
 function getOrderItemsCount(order: Order) {
-  const items = order.items ?? order.products ?? [];
+  const items = order.products ?? [];
   return Array.isArray(items)
     ? items.reduce((acc, i) => acc + (i.quantity ?? 0), 0)
     : 0;
+}
+
+function getOrderTotal(order: Order) {
+  const items = order.products ?? [];
+  return items.reduce((sum, item) => {
+    const price = item.product?.price ?? 0;
+    return sum + price * item.quantity;
+  }, 0);
 }
 
 export default function AdminOrdersPage() {
@@ -35,14 +49,20 @@ export default function AdminOrdersPage() {
 
   async function loadOrders() {
     setError(null);
+
     try {
       setIsLoading(true);
       const data = await ordersService.listMyOrders();
       setOrders(data);
-    } catch {
-      setError(
-        "Não foi possível carregar os pedidos. Verifique se você está logado.",
-      );
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const message =
+        err?.response?.data?.message ??
+        (typeof err?.response?.data === "string" ? err.response.data : null) ??
+        err?.message ??
+        "Não foi possível carregar os pedidos.";
+
+      setError(`${status ? `Status ${status}: ` : ""}${message}`);
     } finally {
       setIsLoading(false);
     }
@@ -55,9 +75,9 @@ export default function AdminOrdersPage() {
   const rows = useMemo(() => {
     return orders.map((o) => {
       const id = String(o.id ?? "—");
-      const status = o.status ?? "—";
+      const status = "Pedido realizado";
       const date = formatDate(o.createdAt);
-      const total = formatMoney(o.total);
+      const total = formatMoney(getOrderTotal(o));
       const qty = getOrderItemsCount(o);
 
       return { id, status, date, total, qty };
@@ -72,7 +92,9 @@ export default function AdminOrdersPage() {
             <Package className="text-primary" size={32} />
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold text-zinc-800">Pedidos</h1>
-              <p className="text-xs text-zinc-500">Lista de pedidos</p>
+              <p className="text-xs text-zinc-500">
+                Lista de pedidos do usuário logado
+              </p>
             </div>
           </div>
 

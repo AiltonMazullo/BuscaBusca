@@ -1,40 +1,41 @@
 // src/types/orders.types.ts
-export interface OrderItemInput {
+
+export interface OrderProductInput {
   productId: number;
   quantity: number;
 }
 
 export interface CreateOrderRequest {
-  products: OrderItemInput[];
-}
-
-export interface OrderItem {
-  productId: number;
-  quantity: number;
-  // se backend retornar produto junto:
-  product?: {
-    id: number;
-    name: string;
-    description?: string;
-    price: number;
-    photos?: string;
-  };
-}
-
-export interface Order {
-  id: number;
-  items?: OrderItem[];
-  products?: OrderItem[]; // caso backend use "products"
-  total?: number;
-  status?: string;
-  createdAt?: string;
+  products: OrderProductInput[];
 }
 
 export interface CheckoutRequest {
-  products: OrderItemInput[];
+  products: OrderProductInput[];
 }
 
 export interface CheckoutResponse {
   url?: string;
   sessionId?: string;
+  message?: string;
+}
+
+export interface OrderProduct {
+  id?: number;
+  productId: number;
+  quantity: number;
+  product?: {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    photos: string[];
+    category?: string;
+  };
+}
+
+export interface Order {
+  id: number;
+  userId?: number;
+  products: OrderProduct[];
+  createdAt?: string;
 }
