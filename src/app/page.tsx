@@ -1,19 +1,14 @@
 "use client";
+
 import { ProductCard } from "@/components/ProductCard";
 import { BenefitsBar } from "@/components/BenefitsBar";
 import { productsService } from "@/services/products.service";
 import type { Product } from "@/types/products.types";
 import { useEffect, useState } from "react";
 
-function slugFromRoute(route: string) {
-  return route.split("/").pop() ?? route;
-}
-
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [error, setError] = useState<string | null>(null);
 
   async function loadProducts() {
@@ -24,6 +19,7 @@ export default function Home() {
       setProducts(data);
     } catch {
       setError("Não foi possível carregar os produtos.");
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +41,15 @@ export default function Home() {
           <div className="h-1 w-12 rounded-full bg-primary" />
         </div>
 
-        {products.length === 0 ? (
+        {isLoading ? (
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-600">
+            Carregando produtos...
+          </div>
+        ) : error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-600">
+            {error}
+          </div>
+        ) : products.length === 0 ? (
           <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-600">
             Nenhum produto encontrado.
           </div>

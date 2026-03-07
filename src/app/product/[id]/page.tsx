@@ -6,6 +6,7 @@ import { Truck, ShieldCheck, CreditCard } from "lucide-react";
 import { productsService } from "@/services/products.service";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductGallery } from "@/components/ProductGallery";
 import type { Product } from "@/types/products.types";
 import { slugify } from "@/utils/utils";
 
@@ -22,7 +23,6 @@ function sameId(a: Product["id"], b: string) {
 export default async function ProductPage(props: ProductPageProps) {
   const { id } = await props.params;
 
-  // ✅ busca todos e acha pelo id (se você tiver endpoint GET /products/:id, melhor ainda)
   let products: Product[] = [];
   try {
     products = await productsService.list();
@@ -44,6 +44,7 @@ export default async function ProductPage(props: ProductPageProps) {
     isFeatured?: boolean;
     imageUrl?: string;
   };
+
   const categoryName = anyP.category ?? null;
   const categorySlug = categoryName ? slugify(categoryName) : null;
 
@@ -55,8 +56,6 @@ export default async function ProductPage(props: ProductPageProps) {
         })
         .slice(0, 4)
     : products.filter((p) => String(p.id) !== String(product.id)).slice(0, 4);
-
-  const imageSrc = product.photos[0] || anyP.imageUrl || "/logo.svg";
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8">
@@ -82,20 +81,13 @@ export default async function ProductPage(props: ProductPageProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <div className="relative overflow-hidden rounded-lg border border-zinc-100 bg-white p-8">
+        <div className="relative">
+          <ProductGallery photos={product.photos} name={product.name} />
           {(anyP.isFeatured ?? false) && (
             <div className="absolute left-0 top-0 z-10 bg-zinc-700 px-4 py-1 text-xs font-bold uppercase text-white">
               DESTAQUE
             </div>
           )}
-
-          <div className="aspect-square w-full">
-            <img
-              src={imageSrc}
-              alt={product.name}
-              className="h-full w-full object-contain"
-            />
-          </div>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -188,7 +180,7 @@ export default async function ProductPage(props: ProductPageProps) {
           {related.map((relatedProduct) => (
             <ProductCard
               key={String(relatedProduct.id)}
-              product={relatedProduct as any}
+              product={relatedProduct}
             />
           ))}
         </div>

@@ -3,8 +3,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 import { ordersService } from "@/services/orders.service";
 import { Trash2, ShoppingCart } from "lucide-react";
 
@@ -16,8 +17,18 @@ function formatPrice(value: number) {
 }
 
 export function CartDrawer() {
-  const { items, totalAmount, isOpen, closeCart, removeFromCart } = useCart();
+  const {
+    items,
+    totalAmount,
+    isOpen,
+    closeCart,
+    removeFromCart,
+    updateQuantity,
+  } = useCart();
+
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,13 +51,11 @@ export function CartDrawer() {
 
       closeCart();
 
-      // Se a API devolver uma URL do Stripe, redireciona direto
       if (response?.url) {
         window.location.href = response.url;
         return;
       }
 
-      // Fallback: se não vier URL, manda para a página de checkout
       router.push("/checkout");
     } catch (err: any) {
       const status = err?.response?.status;
@@ -59,6 +68,15 @@ export function CartDrawer() {
       setError(`${status ? `Status ${status}: ` : ""}${message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  function handleContinueShopping() {
+    closeCart();
+
+    if (!isAuthenticated) {
+      router.push(`/login?redirectTo=${encodeURIComponent(pathname || "/")}`);
+      return;
     }
   }
 
@@ -150,8 +168,40 @@ export function CartDrawer() {
                           </button>
                         </div>
 
-                        <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">
-                          <span>Quantidade: {item.quantity}</span>
+                        <div className="mt-3 flex items-center justify-between gap-3">
+                          <div className="flex h-9 items-stretch overflow-hidden rounded bg-zinc-100">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(
+                                  Number(item.product.id),
+                                  item.quantity - 1,
+                                )
+                              }
+                              className="w-8 text-sm font-bold text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-primary"
+                              aria-label="Diminuir quantidade"
+                            >
+                              -
+                            </button>
+
+                            <div className="flex w-10 items-center justify-center text-sm font-semibold text-zinc-700">
+                              {item.quantity}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(
+                                  Number(item.product.id),
+                                  item.quantity + 1,
+                                )
+                              }
+                              className="w-8 text-sm font-bold text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-primary"
+                              aria-label="Aumentar quantidade"
+                            >
+                              +
+                            </button>
+                          </div>
 
                           <span className="text-sm font-semibold text-primary">
                             {formatPrice(item.product.price * item.quantity)}
@@ -193,7 +243,7 @@ export function CartDrawer() {
 
               <button
                 type="button"
-                onClick={closeCart}
+                onClick={handleContinueShopping}
                 className="mt-3 w-full text-center text-xs font-medium text-primary"
               >
                 Continuar comprando
