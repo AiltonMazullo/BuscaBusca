@@ -24,6 +24,7 @@ interface CartContextValue {
   addToCart: (product: Product, qty?: number) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
+  getProductQuantity: (productId: number) => number;
 
   clearCart: () => void;
   openCart: () => void;
@@ -38,22 +39,6 @@ const CART_STORAGE_KEY = "busca_busca_cart";
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-
-  // hydrate
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const stored = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!stored) return;
-
-    try {
-      const parsed = JSON.parse(stored) as CartItem[];
-      // garante que não vem lixo
-      if (Array.isArray(parsed)) setItems(parsed);
-    } catch {
-      setItems([]);
-    }
-  }, []);
 
   // persist
   useEffect(() => {
@@ -93,7 +78,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function removeFromCart(productId: number) {
-    setItems((current) => current.filter((item) => item.product.id !== productId));
+    setItems((current) =>
+      current.filter((item) => item.product.id !== productId),
+    );
   }
 
   function updateQuantity(productId: number, quantity: number) {
@@ -109,6 +96,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         item.product.id === productId ? { ...item, quantity: q } : item,
       ),
     );
+  }
+
+  function getProductQuantity(productId: number) {
+    const item = items.find((i) => i.product.id === productId);
+    return item ? item.quantity : 0;
   }
 
   function clearCart() {
@@ -137,6 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        getProductQuantity,
         clearCart,
         openCart,
         closeCart,

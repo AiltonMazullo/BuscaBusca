@@ -1,49 +1,57 @@
 "use client";
 
-import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/types/products.types";
-import { ShoppingCart, Minus, Plus } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
-interface AddToCartButtonProps {
+interface Props {
   product: Product;
 }
 
-export function AddToCartButton({ product }: AddToCartButtonProps) {
-  const { addToCart } = useCart();
-  const [quantity, setQuantity] = useState(1);
+export function AddToCartButton({ product }: Props) {
+  const { addToCart, updateQuantity, getProductQuantity } = useCart();
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
+  const quantity = getProductQuantity(product.id);
+
+  function increase() {
+    if (quantity === 0) {
       addToCart(product);
+    } else {
+      updateQuantity(product.id, quantity + 1);
     }
-  };
+  }
+
+  function decrease() {
+    updateQuantity(product.id, quantity - 1);
+  }
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row">
-      <div className="flex items-center rounded-md border border-zinc-200">
+    <div className="flex gap-3">
+      <div className="flex h-10 items-stretch overflow-hidden rounded bg-zinc-100">
         <button
-          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-          className="flex h-12 w-12 items-center justify-center text-zinc-600 hover:bg-zinc-100"
+          onClick={decrease}
+          className="w-10 text-lg font-bold text-zinc-600 hover:bg-zinc-200"
         >
-          <Minus size={16} />
+          -
         </button>
-        <div className="flex h-12 w-16 items-center justify-center border-x border-zinc-200 font-semibold text-zinc-900">
-          {quantity}
+
+        <div className="flex w-12 items-center justify-center text-sm font-semibold">
+          {quantity || 0}
         </div>
+
         <button
-          onClick={() => setQuantity(quantity + 1)}
-          className="flex h-12 w-12 items-center justify-center text-zinc-600 hover:bg-zinc-100"
+          onClick={increase}
+          className="w-10 text-lg font-bold text-zinc-600 hover:bg-zinc-200"
         >
-          <Plus size={16} />
+          +
         </button>
       </div>
 
       <button
-        onClick={handleAddToCart}
-        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-8 py-3 font-bold text-white transition-colors hover:bg-primary/90"
+        onClick={() => addToCart(product)}
+        className="flex items-center gap-2 rounded bg-primary px-6 py-2 text-white"
       >
-        <ShoppingCart size={20} />
+        <ShoppingCart size={18} />
         ADICIONAR AO CARRINHO
       </button>
     </div>
