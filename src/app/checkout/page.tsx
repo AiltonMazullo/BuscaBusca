@@ -24,14 +24,26 @@ export default function CheckoutPage() {
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const payload = useMemo(
+  const createOrderPayload = useMemo(
     () => ({
       products: items.map((item) => ({
         productId: Number(item.product.id),
         quantity: item.quantity,
       })),
+      totalValue: totalAmount,
     }),
-    [items],
+    [items, totalAmount],
+  );
+
+  const checkoutPayload = useMemo(
+    () => ({
+      products: items.map((item) => ({
+        productId: Number(item.product.id),
+        quantity: item.quantity,
+      })),
+      totalValue: totalAmount,
+    }),
+    [items, totalAmount],
   );
 
   async function handleCreateOrder() {
@@ -46,7 +58,7 @@ export default function CheckoutPage() {
       setError(null);
       setIsCreatingOrder(true);
 
-      await ordersService.create(payload);
+      await ordersService.create(createOrderPayload);
 
       clearCart();
       router.push("/my-orders");
@@ -54,6 +66,7 @@ export default function CheckoutPage() {
       const status = err?.response?.status;
       const message =
         err?.response?.data?.message ??
+        err?.response?.data?.error ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
         "Erro ao criar pedido.";
@@ -76,7 +89,7 @@ export default function CheckoutPage() {
       setError(null);
       setIsStartingCheckout(true);
 
-      const response = await ordersService.checkout(payload);
+      const response = await ordersService.checkout(checkoutPayload);
 
       if (response?.url) {
         window.location.href = response.url;
@@ -90,6 +103,7 @@ export default function CheckoutPage() {
       const status = err?.response?.status;
       const message =
         err?.response?.data?.message ??
+        err?.response?.data?.error ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
         "Erro ao iniciar checkout.";

@@ -52,6 +52,7 @@ export function CartDrawer() {
           productId: Number(item.product.id),
           quantity: item.quantity,
         })),
+        totalValue: totalAmount,
       };
 
       const response = await ordersService.checkout(payload);
@@ -68,6 +69,7 @@ export function CartDrawer() {
       const status = err?.response?.status;
       const message =
         err?.response?.data?.message ??
+        err?.response?.data?.error ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
         "Erro ao iniciar checkout.";
@@ -83,7 +85,6 @@ export function CartDrawer() {
 
     if (!isAuthenticated) {
       router.push(`/login?redirectTo=${encodeURIComponent(pathname || "/")}`);
-      return;
     }
   }
 

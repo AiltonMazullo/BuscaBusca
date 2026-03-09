@@ -7,10 +7,12 @@ export interface OrderProductInput {
 
 export interface CreateOrderRequest {
   products: OrderProductInput[];
+  totalValue: number;
 }
 
 export interface CheckoutRequest {
   products: OrderProductInput[];
+  totalValue: number;
 }
 
 export interface CheckoutResponse {
@@ -36,6 +38,7 @@ export interface OrderProduct {
 export interface Order {
   id: number;
   userId?: number;
+  totalValue?: number;
   products: OrderProduct[];
   createdAt?: string;
 }

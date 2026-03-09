@@ -10,7 +10,6 @@ import type {
 export const ordersService = {
   async listMyOrders() {
     const { data } = await api.get<Order[] | Order>("/orders");
-    // se o backend retornar objeto ao invés de array:
     return Array.isArray(data) ? data : [data];
   },
 
