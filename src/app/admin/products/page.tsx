@@ -99,7 +99,7 @@ export default function AdminProductsPage() {
 
     if (!form.name.trim()) return setError("Nome é obrigatório.");
     if (!form.description.trim()) return setError("Descrição é obrigatória.");
-    if (!form.category.trim()) return setError("Selecione uma categoria."); 
+    if (!form.category.trim()) return setError("Selecione uma categoria.");
     if (form.photos.length === 0)
       return setError("Selecione ao menos 1 imagem.");
     if (Number.isNaN(form.price) || form.price <= 0)
@@ -454,7 +454,7 @@ export default function AdminProductsPage() {
           onClick={loadProducts}
           className="mt-4 text-xs font-semibold text-primary hover:underline"
         >
-          Recarregar lista
+          Recarregar
         </button>
       </div>
     </ProtectedRoute>

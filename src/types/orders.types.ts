@@ -22,23 +22,16 @@ export interface CheckoutResponse {
 }
 
 export interface OrderProduct {
-  id?: number;
   productId: number;
   quantity: number;
-  product?: {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    photos: string[];
-    category?: string;
-  };
+  name?: string;
+  price?: number;
 }
 
 export interface Order {
   id: number;
   userId?: number;
   totalValue?: number;
-  products: OrderProduct[];
   createdAt?: string;
+  products: OrderProduct[];
 }

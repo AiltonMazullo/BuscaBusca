@@ -36,7 +36,7 @@ export default function Home() {
       <section className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 sm:gap-8">
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-xl font-bold text-zinc-800 sm:text-2xl">
-            Destaques da semana
+            Destaques
           </h2>
           <div className="h-1 w-12 rounded-full bg-primary" />
         </div>

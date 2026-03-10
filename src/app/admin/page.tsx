@@ -42,19 +42,6 @@ export default function AdminDashboardPage() {
             </div>
             <p className="mt-2 text-sm text-zinc-600">CRUD de produtos.</p>
           </Link>
-
-          <Link
-            href="/my-profile"
-            className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition hover:bg-zinc-50"
-          >
-            <div className="flex items-center gap-2">
-              <Users className="text-primary" />
-              <span className="font-bold text-zinc-800">{userName}</span>
-            </div>
-            <p className="mt-2 text-sm text-zinc-600">
-              Acessar informações do seu perfil.
-            </p>
-          </Link>
         </div>
       </div>
     </ProtectedRoute>

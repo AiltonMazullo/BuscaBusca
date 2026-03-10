@@ -1,19 +1,21 @@
 import axios from "axios";
 
+const AUTH_TOKEN_STORAGE_KEY = "@buscabusca:token";
+
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("@buscabusca:token");
+    const token = window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+
     if (token) {
-      config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers.Authorization) {
+      delete config.headers.Authorization;
     }
   }
+
   return config;
 });

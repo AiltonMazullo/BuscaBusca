@@ -7,14 +7,21 @@ export function Footer() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 overflow-hidden">
-              <img src="/logo.svg" alt="Busca Busca Logo" className="h-full w-full object-contain" />
+              <img
+                src="/logo.svg"
+                alt="Busca Busca Logo"
+                className="h-full w-full object-contain"
+              />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-lg font-bold text-primary">Busca Busca</span>
+              <span className="text-lg font-bold text-primary">
+                Busca Busca
+              </span>
             </div>
           </div>
           <p className="max-w-xs text-sm text-zinc-500">
-            A sua loja online de confiança. Encontre tudo o que precisa com o melhor preço e qualidade.
+            A sua loja online de confiança. Encontre tudo o que precisa com o
+            melhor preço e qualidade.
           </p>
         </div>
         <div className="space-y-2 text-xs">
@@ -35,9 +42,10 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-zinc-100 bg-zinc-50 py-4 text-center text-[11px] text-zinc-400">
-        <span>Site fictício para portfólio. Direitos autorais pertencem à marca original.</span>
+        <span>
+          Direitos reservados &copy; {new Date().getFullYear()} Busca Busca
+        </span>
       </div>
     </footer>
   );
 }
-

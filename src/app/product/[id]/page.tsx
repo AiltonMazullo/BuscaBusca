@@ -168,7 +168,7 @@ export default async function ProductPage(props: ProductPageProps) {
         </div>
       </div>
 
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <div className="mb-8 flex flex-col items-center gap-2">
           <h2 className="text-2xl font-bold text-zinc-800">
             Produtos Relacionados
@@ -184,7 +184,7 @@ export default async function ProductPage(props: ProductPageProps) {
             />
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

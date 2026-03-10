@@ -6,6 +6,25 @@ import { Package, RefreshCcw } from "lucide-react";
 import { ordersService } from "@/services/orders.service";
 import type { Order } from "@/types/orders.types";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 10;
 
 function formatDate(value?: string) {
   if (!value) return "—";
@@ -35,17 +54,34 @@ function getOrderItemsCount(order: Order) {
 }
 
 function getOrderTotal(order: Order) {
+  if (typeof order.totalValue === "number") {
+    return order.totalValue;
+  }
+
   const items = order.products ?? [];
   return items.reduce((sum, item) => {
-    const price = item.product?.price ?? 0;
-    return sum + price * item.quantity;
+    return sum + (item.price ?? 0) * item.quantity;
   }, 0);
+}
+
+function getOrderItemsLabel(order: Order) {
+  const items = order.products ?? [];
+
+  if (!items.length) return "—";
+
+  return items
+    .map(
+      (item) =>
+        `${item.quantity}x ${item.name ?? `Produto #${item.productId}`}`,
+    )
+    .join(", ");
 }
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   async function loadOrders() {
     setError(null);
@@ -54,6 +90,7 @@ export default function AdminOrdersPage() {
       setIsLoading(true);
       const data = await ordersService.listMyOrders();
       setOrders(data);
+      setCurrentPage(1);
     } catch (err: any) {
       const status = err?.response?.status;
       const message =
@@ -73,16 +110,52 @@ export default function AdminOrdersPage() {
   }, []);
 
   const rows = useMemo(() => {
-    return orders.map((o) => {
-      const id = String(o.id ?? "—");
-      const status = "Pedido realizado";
-      const date = formatDate(o.createdAt);
-      const total = formatMoney(getOrderTotal(o));
-      const qty = getOrderItemsCount(o);
+    return [...orders]
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      })
+      .map((o) => {
+        const id = String(o.id ?? "—");
+        const status = "Pedido recebido";
+        const date = formatDate(o.createdAt);
+        const total = formatMoney(getOrderTotal(o));
+        const qty = getOrderItemsCount(o);
+        const itemsLabel = getOrderItemsLabel(o);
 
-      return { id, status, date, total, qty };
-    });
+        return { id, status, date, total, qty, itemsLabel };
+      });
   }, [orders]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
+
+  const paginatedRows = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return rows.slice(start, end);
+  }, [rows, currentPage]);
+
+  const visiblePages = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4];
+    }
+
+    if (currentPage >= totalPages - 2) {
+      return [totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [currentPage - 1, currentPage, currentPage + 1];
+  }, [currentPage, totalPages]);
+
+  function goToPage(page: number) {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  }
 
   return (
     <ProtectedRoute requireAdmin>
@@ -115,58 +188,172 @@ export default function AdminOrdersPage() {
         )}
 
         <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-xs text-zinc-600">
-              <tr>
-                <th className="px-4 py-3 text-left">Pedido</th>
-                <th className="px-4 py-3 text-left">Data</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Itens</th>
-                <th className="px-4 py-3 text-right">Total</th>
-              </tr>
-            </thead>
+          <Table>
+            <TableHeader className="bg-zinc-50">
+              <TableRow>
+                <TableHead className="px-4 py-3 text-left">Pedido</TableHead>
+                <TableHead className="px-4 py-3 text-left">Data</TableHead>
+                <TableHead className="px-4 py-3 text-left">Status</TableHead>
+                <TableHead className="px-4 py-3 text-left">Itens</TableHead>
+                <TableHead className="px-4 py-3 text-left">Produtos</TableHead>
+                <TableHead className="px-4 py-3 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
 
-            <tbody>
+            <TableBody>
               {isLoading ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     className="px-4 py-6 text-center text-sm text-zinc-500"
-                    colSpan={5}
+                    colSpan={6}
                   >
                     Carregando...
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : rows.length === 0 ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     className="px-4 py-6 text-center text-sm text-zinc-500"
-                    colSpan={5}
+                    colSpan={6}
                   >
                     Nenhum pedido encontrado.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
-                rows.map((o) => (
-                  <tr key={o.id} className="border-t border-zinc-100">
-                    <td className="px-4 py-3 font-semibold text-zinc-800">
+                paginatedRows.map((o) => (
+                  <TableRow key={o.id} className="align-top">
+                    <TableCell className="px-4 py-3 font-semibold text-zinc-800">
                       {o.id}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600">{o.date}</td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3 text-zinc-600">
+                      {o.date}
+                    </TableCell>
+
+                    <TableCell className="px-3 py-3">
                       <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
                         {o.status}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-700">{o.qty || "—"}</td>
-                    <td className="px-4 py-3 text-right font-bold text-primary">
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3 text-zinc-700">
+                      {o.qty}
+                    </TableCell>
+
+                    <TableCell className="max-w-[320px] px-4 py-3 text-zinc-700">
+                      <span className="line-clamp-2">{o.itemsLabel}</span>
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3 text-right font-bold text-primary">
                       {o.total}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
+
+        {!isLoading && rows.length > 0 && totalPages > 1 && (
+          <div className="mt-6">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToPage(currentPage - 1);
+                    }}
+                    aria-disabled={currentPage === 1}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                {visiblePages[0] > 1 && (
+                  <>
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(1);
+                        }}
+                        isActive={currentPage === 1}
+                      >
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+
+                    {visiblePages[0] > 2 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                  </>
+                )}
+
+                {visiblePages.map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToPage(page);
+                      }}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                {visiblePages[visiblePages.length - 1] < totalPages && (
+                  <>
+                    {visiblePages[visiblePages.length - 1] < totalPages - 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(totalPages);
+                        }}
+                        isActive={currentPage === totalPages}
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToPage(currentPage + 1);
+                    }}
+                    aria-disabled={currentPage === totalPages}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
