@@ -25,6 +25,7 @@ export function CartDrawer() {
     closeCart,
     removeFromCart,
     updateQuantity,
+    clearCart,
   } = useCart();
 
   const { isAuthenticated } = useAuth();
@@ -55,16 +56,11 @@ export function CartDrawer() {
         totalValue: totalAmount,
       };
 
-      const response = await ordersService.checkout(payload);
+      await ordersService.create(payload);
 
+      clearCart();
       closeCart();
-
-      if (response?.url) {
-        window.location.href = response.url;
-        return;
-      }
-
-      router.push("/checkout");
+      router.push("/my-orders");
     } catch (err: any) {
       const status = err?.response?.status;
       const message =
@@ -72,7 +68,7 @@ export function CartDrawer() {
         err?.response?.data?.error ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
-        "Erro ao iniciar checkout.";
+        "Erro ao criar pedido.";
 
       setError(`${status ? `Status ${status}: ` : ""}${message}`);
     } finally {
