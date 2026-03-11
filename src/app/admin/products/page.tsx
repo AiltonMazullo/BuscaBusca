@@ -8,6 +8,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MENU_ITEMS } from "@/components/layout/Header";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProductForm = {
   name: string;
@@ -50,6 +68,12 @@ export default function AdminProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [productIdToDelete, setProductIdToDelete] = useState<number | null>(
+    null,
+  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function loadProducts() {
     setError(null);
@@ -109,7 +133,6 @@ export default function AdminProductsPage() {
     try {
       setIsSaving(true);
 
-      // photos é array (API aceita array agora pelo swagger que você mandou)
       const payload = {
         name: form.name,
         description: form.description,
@@ -128,7 +151,8 @@ export default function AdminProductsPage() {
       }
 
       setForm(emptyForm);
-    } catch {
+    } catch (err) {
+      console.error("Erro ao salvar produto:", err);
       setError(
         "Erro ao salvar produto. Verifique se você está logado como admin.",
       );
@@ -137,16 +161,31 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function handleDelete(id: number) {
-    const ok = window.confirm("Tem certeza que deseja excluir esse produto?");
-    if (!ok) return;
+  function handleAskDelete(id: number) {
+    setProductIdToDelete(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  async function handleDeleteConfirmed() {
+    if (productIdToDelete === null) return;
 
     setError(null);
+
     try {
-      await productsService.remove(id);
-      setItems((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      setError("Erro ao excluir. Verifique sua permissão de admin.");
+      setIsDeleting(true);
+
+      await productsService.remove(productIdToDelete);
+
+      setItems((prev) => prev.filter((p) => p.id !== productIdToDelete));
+      setIsDeleteDialogOpen(false);
+      setProductIdToDelete(null);
+    } catch (err) {
+      console.error("Erro ao excluir produto:", err);
+      setError(
+        "Erro ao excluir produto. Ele pode estar vinculado a pedidos ou você não tem permissão.",
+      );
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -173,8 +212,8 @@ export default function AdminProductsPage() {
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold text-zinc-800">Produtos</h1>
             <p className="text-xs text-zinc-500">
-              Você pode anexar até {MAX_IMAGES} imagens. A primeira imagem é
-              enviada como capa.
+              Você pode anexar até {MAX_IMAGES} imagens. A primeira imagem é a
+              capa.
             </p>
           </div>
         </div>
@@ -216,7 +255,6 @@ export default function AdminProductsPage() {
             Destaque
           </label>
 
-          {/* ── Select de categoria ── */}
           <div className="md:col-span-3">
             <label className="mb-1 block text-xs font-medium text-zinc-700">
               Categoria
@@ -228,9 +266,7 @@ export default function AdminProductsPage() {
               }
               className={[
                 "w-full rounded-md border px-3 py-2 text-sm outline-none transition",
-
                 "focus:border-primary",
-
                 form.category
                   ? "border-zinc-300 text-zinc-800"
                   : "border-zinc-300 text-zinc-400",
@@ -261,7 +297,6 @@ export default function AdminProductsPage() {
             className="min-h-[90px] rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-primary md:col-span-3"
           />
 
-          {/* Upload de imagens */}
           <div className="md:col-span-3">
             <div className="mb-2 flex items-center justify-between gap-3">
               <label className="block text-xs font-medium text-zinc-700">
@@ -373,82 +408,93 @@ export default function AdminProductsPage() {
         </form>
 
         <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-xs text-zinc-600">
-              <tr>
-                <th className="px-4 py-3 text-left">Produto</th>
-                <th className="px-4 py-3 text-left">Preço</th>
-                <th className="px-4 py-3 text-left">Imagem</th>
-                <th className="px-4 py-3 text-right">Ações</th>
-              </tr>
-            </thead>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-zinc-50 hover:bg-zinc-50">
+                <TableHead className="px-4 py-3 text-left">Produto</TableHead>
+                <TableHead className="px-4 py-3 text-left">Preço</TableHead>
+                <TableHead className="px-4 py-3 text-left">Imagens</TableHead>
+                <TableHead className="px-6 py-3 text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
 
-            <tbody>
+            <TableBody>
               {isLoading ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     className="px-4 py-6 text-center text-sm text-zinc-500"
                     colSpan={4}
                   >
                     Carregando...
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : items.length === 0 ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     className="px-4 py-6 text-center text-sm text-zinc-500"
                     colSpan={4}
                   >
                     Nenhum produto cadastrado.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 items.map((p) => (
-                  <tr key={p.id} className="border-t border-zinc-100">
-                    <td className="px-4 py-3 font-semibold text-zinc-800">
+                  <TableRow key={p.id} className="align-middle">
+                    <TableCell
+                      className="px-4 py-3 font-semibold text-zinc-800 max-w-md truncate"
+                      title={p.name}
+                    >
                       {p.name}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3 text-zinc-700">
+                    <TableCell className="px-4 py-3 text-zinc-700">
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       }).format(p.price)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3">
-                      {p.photos &&
-                        p.photos.length > 0 &&
-                        p.photos.map((photo, index) => (
-                          <img
-                            key={index}
-                            src={photo}
-                            alt={p.name}
-                            className="h-10 w-10 rounded-md border border-zinc-200 object-cover"
-                          />
-                        ))}
-                    </td>
+                    <TableCell className="px-4 py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {p.photos && p.photos.length > 0 ? (
+                          p.photos.map((photo, index) => (
+                            <img
+                              key={index}
+                              src={photo}
+                              alt={p.name}
+                              className="h-10 w-10 rounded-md border border-zinc-200 object-cover"
+                            />
+                          ))
+                        ) : (
+                          <span className="text-xs text-zinc-500">—</span>
+                        )}
+                      </div>
+                    </TableCell>
 
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => startEdit(p)}
-                        className="mr-2 inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-200"
-                      >
-                        <Pencil size={14} /> Editar
-                      </button>
+                    <TableCell className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(p)}
+                          className="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-200"
+                        >
+                          <Pencil size={14} /> Editar
+                        </button>
 
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="inline-flex items-center gap-1 rounded-md bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
-                      >
-                        <Trash2 size={14} /> Excluir
-                      </button>
-                    </td>
-                  </tr>
+                        <button
+                          type="button"
+                          onClick={() => handleAskDelete(p.id)}
+                          className="inline-flex items-center gap-1 rounded-md bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+                        >
+                          <Trash2 size={14} /> Excluir
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
 
         <button
@@ -457,6 +503,49 @@ export default function AdminProductsPage() {
         >
           Recarregar
         </button>
+
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setIsDeleteDialogOpen(open);
+            if (!open && !isDeleting) {
+              setProductIdToDelete(null);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir produto</AlertDialogTitle>
+              <AlertDialogDescription>
+                Você deseja realmente excluir este produto? Essa ação não pode
+                ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  if (isDeleting) return;
+                  setIsDeleteDialogOpen(false);
+                  setProductIdToDelete(null);
+                }}
+              >
+                Cancelar
+              </AlertDialogCancel>
+
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleDeleteConfirmed();
+                }}
+                disabled={isDeleting}
+                className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+              >
+                {isDeleting ? "Excluindo..." : "Excluir"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </ProtectedRoute>
   );

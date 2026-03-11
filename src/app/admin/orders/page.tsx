@@ -23,6 +23,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ORDER_STATUS_MAP } from "@/utils/order-status";
+import { cn } from "@/utils/utils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -77,6 +79,22 @@ function getOrderItemsLabel(order: Order) {
     .join(", ");
 }
 
+function getOrderStatus(status?: string) {
+  if (!status) {
+    return {
+      label: "Desconhecido",
+      className: "bg-zinc-100 text-zinc-600",
+    };
+  }
+
+  return (
+    ORDER_STATUS_MAP[status as keyof typeof ORDER_STATUS_MAP] ?? {
+      label: status,
+      className: "bg-zinc-100 text-zinc-600",
+    }
+  );
+}
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,7 +136,7 @@ export default function AdminOrdersPage() {
       })
       .map((o) => {
         const id = String(o.id ?? "—");
-        const status = "Pedido recebido";
+        const status = getOrderStatus(o.status);
         const date = formatDate(o.createdAt);
         const total = formatMoney(getOrderTotal(o));
         const qty = getOrderItemsCount(o);
@@ -231,8 +249,13 @@ export default function AdminOrdersPage() {
                     </TableCell>
 
                     <TableCell className="px-3 py-3">
-                      <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
-                        {o.status}
+                      <span
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs font-medium",
+                          o.status.className,
+                        )}
+                      >
+                        {o.status.label}
                       </span>
                     </TableCell>
 
