@@ -7,6 +7,7 @@ import { Package, RefreshCcw } from "lucide-react";
 import { ordersService } from "@/services/orders.service";
 import { useAuth } from "@/hooks/useAuth";
 import type { Order } from "@/types/orders.types";
+import { ORDER_STATUS_MAP } from "@/utils/order-status";
 
 function formatDate(value?: string) {
   if (!value) return "—";
@@ -35,6 +36,22 @@ function getOrderTotal(order: Order) {
   return (order.products ?? []).reduce((sum, item) => {
     return sum + (item.price ?? 0) * item.quantity;
   }, 0);
+}
+
+function getOrderStatus(status?: string) {
+  if (!status) {
+    return {
+      label: "Desconhecido",
+      className: "bg-zinc-100 text-zinc-600",
+    };
+  }
+
+  return (
+    ORDER_STATUS_MAP[status as keyof typeof ORDER_STATUS_MAP] ?? {
+      label: status,
+      className: "bg-zinc-100 text-zinc-600",
+    }
+  );
 }
 
 export default function MyOrdersPage() {

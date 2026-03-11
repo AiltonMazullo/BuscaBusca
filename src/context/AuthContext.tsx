@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  ReactNode,
+  startTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
 import type { User, AuthResponse } from "@/types/auth.types";
@@ -18,6 +26,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isHydrated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -29,6 +38,7 @@ const AUTH_TOKEN_STORAGE_KEY = "@buscabusca:token";
 
 function safeParseUser(raw: string | null): User | null {
   if (!raw) return null;
+
   try {
     return JSON.parse(raw) as User;
   } catch {
@@ -36,25 +46,49 @@ function safeParseUser(raw: string | null): User | null {
   }
 }
 
+type AuthState = {
+  user: User | null;
+  token: string | null;
+  isHydrated: boolean;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window === "undefined") return null;
-    return safeParseUser(localStorage.getItem(AUTH_USER_STORAGE_KEY));
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    token: null,
+    isHydrated: false,
   });
 
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedUser = safeParseUser(
+      localStorage.getItem(AUTH_USER_STORAGE_KEY),
+    );
+    const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+
+    startTransition(() => {
+      setAuthState({
+        user: storedUser,
+        token: storedToken,
+        isHydrated: true,
+      });
+    });
+  }, []);
 
   const persistSession = (session: AuthResponse) => {
-    setUser(session.user);
-    setToken(session.token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(session.user));
+      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
+    }
 
-    localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(session.user));
-    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
+    setAuthState({
+      user: session.user,
+      token: session.token,
+      isHydrated: true,
+    });
   };
 
   const login = async (email: string, password: string) => {
@@ -62,39 +96,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistSession(session);
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    const session = await authService.register({ name, email, password });
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    role = "user",
+  ) => {
+    const session = await authService.register({
+      name,
+      email,
+      password,
+    });
+
     persistSession(session);
     router.push("/login");
   };
 
   const logout = () => {
-    setUser(null);
-    setToken(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    }
 
-    localStorage.removeItem(AUTH_USER_STORAGE_KEY);
-    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    setAuthState({
+      user: null,
+      token: null,
+      isHydrated: true,
+    });
 
     router.push("/login");
   };
 
-  const isAuthenticated = !!user && !!token;
+  const isAuthenticated = !!authState.user && !!authState.token;
 
   const isAdmin = useMemo(() => {
-    const role = (user?.role ?? "").toString().toLowerCase();
+    const role = (authState.user?.role ?? "").toString().toLowerCase();
     return role === "admin";
-  }, [user]);
+  }, [authState.user]);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        token,
+        user: authState.user,
+        token: authState.token,
         login,
         register,
         logout,
         isAuthenticated,
         isAdmin,
+        isHydrated: authState.isHydrated,
       }}
     >
       {children}

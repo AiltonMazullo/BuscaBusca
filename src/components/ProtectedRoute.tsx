@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-interface ProtectedRouteProps {
+type ProtectedRouteProps = {
   children: React.ReactNode;
   requireAdmin?: boolean;
-}
+};
 
 export function ProtectedRoute({
   children,
@@ -15,34 +15,31 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, isHydrated } = useAuth();
 
   useEffect(() => {
-    // usuário não logado
+    if (!isHydrated) return;
+
     if (!isAuthenticated) {
-      router.replace(`/login?redirectTo=${encodeURIComponent(pathname)}`);
+      router.replace(`/login?redirectTo=${pathname}`);
       return;
     }
 
-    // precisa ser admin
     if (requireAdmin && !isAdmin) {
       router.replace("/");
-      return;
     }
-  }, [isAuthenticated, isAdmin, requireAdmin, router, pathname]);
+  }, [isAuthenticated, isAdmin, requireAdmin, router, pathname, isHydrated]);
 
-  // loading enquanto verifica
-  if (!isAuthenticated) {
+  if (!isHydrated) {
     return (
-      <div className="flex h-[60vh] items-center justify-center text-sm text-zinc-500">
-        Verificando acesso...
+      <div className="flex min-h-[200px] items-center justify-center text-sm text-zinc-500">
+        Carregando...
       </div>
     );
   }
 
-  if (requireAdmin && !isAdmin) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
+  if (requireAdmin && !isAdmin) return null;
 
   return <>{children}</>;
 }

@@ -82,7 +82,7 @@ export function CartDrawer() {
       setIsSubmitting(false);
     }
   }
-
+  
   function handleContinueShopping() {
     closeCart();
 
