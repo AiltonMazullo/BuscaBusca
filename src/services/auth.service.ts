@@ -11,9 +11,18 @@ const TOKEN_KEY = "@buscabusca:token";
 const USER_KEY = "@buscabusca:user";
 
 export const authService = {
-  async register(payload: RegisterRequest) {
-    const { data } = await api.post<AuthResponse>("/auth/register", payload);
-    return data;
+  async register(data: Omit<RegisterRequest, "role">) {
+    const payload: RegisterRequest = {
+      ...data,
+      role: "USER",
+    };
+
+    const { data: response } = await api.post<AuthResponse>(
+      "/auth/register",
+      payload,
+    );
+
+    return response;
   },
 
   async login(payload: LoginRequest) {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,16 +17,10 @@ function formatPrice(value: number) {
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, closeCart } = useCart();
 
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login?redirectTo=/checkout");
-    }
-  }, [isAuthenticated, router]);
 
   const createOrderPayload = useMemo(
     () => ({
@@ -51,18 +45,26 @@ export default function CheckoutPage() {
       setError(null);
       setIsCreatingOrder(true);
 
-      await ordersService.create(createOrderPayload);
+      const response = await ordersService.create(createOrderPayload);
+
+      if (response?.checkoutUrl) {
+        closeCart();
+        window.open(response.checkoutUrl, "_blank", "noopener,noreferrer");
+        router.push("/");
+        return;
+      }
 
       clearCart();
-      router.push("/");
+      router.push("/my-orders");
     } catch (err: any) {
       const status = err?.response?.status;
       const message =
         err?.response?.data?.message ??
         err?.response?.data?.error ??
+        err?.response?.data?.details ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
-        "Erro ao criar pedido.";
+        "Erro ao finalizar pedido.";
 
       setError(`${status ? `Status ${status}: ` : ""}${message}`);
     } finally {

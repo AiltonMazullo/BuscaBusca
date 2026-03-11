@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/CartDrawer.tsx
 "use client";
 
 import { useState } from "react";
@@ -56,7 +55,14 @@ export function CartDrawer() {
         totalValue: totalAmount,
       };
 
-      await ordersService.create(payload);
+      const response = await ordersService.create(payload);
+
+      if (response?.checkoutUrl) {
+        closeCart();
+        window.open(response.checkoutUrl, "_blank", "noopener,noreferrer");
+        router.push("/");
+        return;
+      }
 
       clearCart();
       closeCart();
@@ -66,6 +72,7 @@ export function CartDrawer() {
       const message =
         err?.response?.data?.message ??
         err?.response?.data?.error ??
+        err?.response?.data?.details ??
         (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
         "Erro ao criar pedido.";
@@ -252,11 +259,6 @@ export function CartDrawer() {
               >
                 Continuar comprando
               </button>
-
-              <div className="mt-4 flex items-center justify-end gap-2 text-xs text-green-500">
-                <span>Fale pelo WhatsApp</span>
-                <span>●</span>
-              </div>
             </footer>
           </motion.aside>
         </>

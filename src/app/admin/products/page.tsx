@@ -7,6 +7,7 @@ import { Boxes, Plus, Trash2, Pencil, X, ImagePlus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MENU_ITEMS } from "@/components/layout/Header";
+import { Textarea } from "@/components/ui/textarea";
 
 type ProductForm = {
   name: string;
@@ -251,9 +252,9 @@ export default function AdminProductsPage() {
             </select>
           </div>
 
-          <textarea
+          <Textarea
             value={form.description}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setForm((f) => ({ ...f, description: e.target.value }))
             }
             placeholder="Descrição"

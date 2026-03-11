@@ -39,7 +39,6 @@ function safeParseUser(raw: string | null): User | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-
   const [user, setUser] = useState<User | null>(() => {
     if (typeof window === "undefined") return null;
     return safeParseUser(localStorage.getItem(AUTH_USER_STORAGE_KEY));
@@ -63,14 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistSession(session);
   };
 
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    role = "user",
-  ) => {
-    const session = await authService.register({ name, email, password, role });
+  const register = async (name: string, email: string, password: string) => {
+    const session = await authService.register({ name, email, password });
     persistSession(session);
+    router.push("/login");
   };
 
   const logout = () => {

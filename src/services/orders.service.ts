@@ -1,10 +1,8 @@
-// src/services/orders.service.ts
 import { api } from "@/lib/api";
 import type {
   Order,
   CreateOrderRequest,
-  CheckoutRequest,
-  CheckoutResponse,
+  CreateOrderResponse,
 } from "@/types/orders.types";
 
 export const ordersService = {
@@ -14,15 +12,7 @@ export const ordersService = {
   },
 
   async create(payload: CreateOrderRequest) {
-    const { data } = await api.post<Order>("/orders", payload);
-    return data;
-  },
-
-  async checkout(payload: CheckoutRequest) {
-    const { data } = await api.post<CheckoutResponse>(
-      "/orders/checkout",
-      payload,
-    );
+    const { data } = await api.post<CreateOrderResponse>("/orders", payload);
     return data;
   },
 };

@@ -9,6 +9,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductGallery } from "@/components/ProductGallery";
 import type { Product } from "@/types/products.types";
 import { slugify } from "@/utils/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { Field, FieldLabel } from "@/components/ui/field";
 
 interface ProductPageProps {
   params: Promise<{
@@ -103,7 +105,7 @@ export default async function ProductPage(props: ProductPageProps) {
             </span>
           </div>
 
-          <div className="mt-4 flex flex-col gap-1 rounded-lg bg-zinc-50 p-6">
+          <div className="flex flex-col gap-1 rounded-lg bg-zinc-50">
             <span className="text-3xl font-bold text-zinc-900">
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
@@ -132,18 +134,26 @@ export default async function ProductPage(props: ProductPageProps) {
             </span>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <h3 className="font-semibold text-zinc-900">Descrição</h3>
-            <p className="leading-relaxed text-zinc-600">
+          <Field data-disabled className="flex flex-col gap-2">
+            <FieldLabel
+              htmlFor="textarea-disabled"
+              className="font-bold text-zinc-900"
+            >
+              Descrição
+            </FieldLabel>
+            <Textarea
+              className="leading-relaxed font-semibold text-zinc-900 max-h-[159px] overflow-y-auto resize-none"
+              disabled
+            >
               {product.description}
-            </p>
-          </div>
+            </Textarea>
+          </Field>
 
-          <div className="mt-4">
+          <div>
             <AddToCartButton product={product as any} />
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="flex flex-col items-center gap-2 rounded border border-zinc-100 bg-white p-4 text-center">
               <Truck className="text-primary" size={24} />
               <span className="text-xs font-bold text-zinc-700">
