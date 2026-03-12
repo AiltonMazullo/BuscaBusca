@@ -29,21 +29,28 @@ export function HomeBanner() {
           <img
             src={banners[0].image}
             alt={banners[0].title}
-            className="h-[360px] w-full object-cover opacity-55"
+            className="h-[360px] w-full object-cover"
           />
+
+          {/* gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/60 to-transparent" />
+
           <div className="absolute inset-0 flex flex-col justify-center p-8 text-white">
             <span className="mb-2 text-sm font-semibold uppercase tracking-wide text-orange-300">
               Oferta especial
             </span>
+
             <h1 className="max-w-xl text-3xl font-bold leading-tight md:text-5xl">
               {banners[0].title}
             </h1>
+
             <p className="mt-3 max-w-lg text-sm text-zinc-100 md:text-base">
               {banners[0].subtitle}
             </p>
+
             <Link
               href={banners[0].href}
-              className="mt-6 inline-flex w-fit rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+              className="mt-6 inline-flex w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold text-primary hover:bg-zinc-100"
             >
               {banners[0].cta}
             </Link>
@@ -69,8 +76,8 @@ export function HomeBanner() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="relative rounded-2xl p-[1px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 animate-[borderMove_6s_linear_infinite]">
+            <div className="rounded-2xl bg-white p-5">
               <p className="text-sm font-semibold text-zinc-800">
                 Frete rápido
               </p>
@@ -78,8 +85,10 @@ export function HomeBanner() {
                 Entrega para todo o Brasil
               </p>
             </div>
+          </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="relative rounded-2xl p-[1px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 animate-[borderMove_6s_linear_infinite]">
+            <div className="rounded-2xl bg-white p-5">
               <p className="text-sm font-semibold text-zinc-800">
                 Pix e cartão
               </p>
