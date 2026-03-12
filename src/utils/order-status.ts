@@ -16,3 +16,19 @@ export const ORDER_STATUS_MAP = {
     className: "bg-red-100 text-red-700",
   },
 };
+
+export function getOrderStatus(status?: string) {
+  if (!status) {
+    return {
+      label: "Desconhecido",
+      className: "bg-zinc-100 text-zinc-600",
+    };
+  }
+
+  return (
+    ORDER_STATUS_MAP[status as keyof typeof ORDER_STATUS_MAP] ?? {
+      label: status,
+      className: "bg-zinc-100 text-zinc-600",
+    }
+  );
+}

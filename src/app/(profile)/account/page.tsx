@@ -31,6 +31,12 @@ export default function MyProfilePage() {
                 {user?.email ?? "usuario@exemplo.com"}
               </span>
             </p>
+            <Link
+              href="/my-profile"
+              className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90"
+            >
+              Editar meus dados
+            </Link>
           </div>
         </div>
 

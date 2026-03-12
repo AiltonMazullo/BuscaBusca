@@ -23,7 +23,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ORDER_STATUS_MAP } from "@/utils/order-status";
+import { getOrderStatus } from "@/utils/order-status";
 import { cn } from "@/utils/utils";
 
 const ITEMS_PER_PAGE = 10;
@@ -77,22 +77,6 @@ function getOrderItemsLabel(order: Order) {
         `${item.quantity}x ${item.name ?? `Produto #${item.productId}`}`,
     )
     .join(", ");
-}
-
-function getOrderStatus(status?: string) {
-  if (!status) {
-    return {
-      label: "Desconhecido",
-      className: "bg-zinc-100 text-zinc-600",
-    };
-  }
-
-  return (
-    ORDER_STATUS_MAP[status as keyof typeof ORDER_STATUS_MAP] ?? {
-      label: status,
-      className: "bg-zinc-100 text-zinc-600",
-    }
-  );
 }
 
 export default function AdminOrdersPage() {

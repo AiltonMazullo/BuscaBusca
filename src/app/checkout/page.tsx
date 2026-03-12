@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,10 +17,15 @@ function formatPrice(value: number) {
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const { items, totalAmount, clearCart, closeCart } = useCart();
-
+  const { items, totalAmount } = useCart();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login?redirectTo=/checkout");
+    }
+  }, [isAuthenticated, router]);
 
   const createOrderPayload = useMemo(
     () => ({
@@ -48,13 +53,11 @@ export default function CheckoutPage() {
       const response = await ordersService.create(createOrderPayload);
 
       if (response?.checkoutUrl) {
-        closeCart();
         window.open(response.checkoutUrl, "_blank", "noopener,noreferrer");
         router.push("/");
         return;
       }
 
-      clearCart();
       router.push("/my-orders");
     } catch (err: any) {
       const status = err?.response?.status;
@@ -62,7 +65,6 @@ export default function CheckoutPage() {
         err?.response?.data?.message ??
         err?.response?.data?.error ??
         err?.response?.data?.details ??
-        (typeof err?.response?.data === "string" ? err.response.data : null) ??
         err?.message ??
         "Erro ao finalizar pedido.";
 
@@ -72,6 +74,8 @@ export default function CheckoutPage() {
     }
   }
 
+  if (!isAuthenticated) return null;
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <h1 className="text-xl font-semibold text-zinc-900">
@@ -80,9 +84,7 @@ export default function CheckoutPage() {
 
       <p className="mt-1 text-sm text-zinc-500">
         Usuário logado:{" "}
-        <span className="font-medium text-zinc-800">
-          {user?.email ?? "Não autenticado"}
-        </span>
+        <span className="font-medium text-zinc-800">{user?.email}</span>
       </p>
 
       {error && (
@@ -97,24 +99,19 @@ export default function CheckoutPage() {
         </h2>
 
         <ul className="mt-4 space-y-3 text-sm text-zinc-700">
-          {items.length === 0 ? (
-            <li className="text-zinc-500">Seu carrinho está vazio.</li>
-          ) : (
-            items.map((item) => (
-              <li
-                key={item.product.id}
-                className="flex items-center justify-between gap-4"
-              >
-                <span>
-                  {item.quantity}x {item.product.name}
-                </span>
-
-                <span className="font-semibold text-primary">
-                  {formatPrice(item.product.price * item.quantity)}
-                </span>
-              </li>
-            ))
-          )}
+          {items.map((item) => (
+            <li
+              key={item.product.id}
+              className="flex items-center justify-between gap-4"
+            >
+              <span>
+                {item.quantity}x {item.product.name}
+              </span>
+              <span className="font-semibold text-primary">
+                {formatPrice(item.product.price * item.quantity)}
+              </span>
+            </li>
+          ))}
         </ul>
 
         <div className="mt-4 flex items-center justify-between border-t border-zinc-200 pt-4 text-sm">
@@ -124,16 +121,12 @@ export default function CheckoutPage() {
           </span>
         </div>
 
-        <p className="mt-4 text-xs text-zinc-500">
-          Você desejar finalizar o pedido?
-        </p>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-1">
+        <div className="mt-6">
           <button
             type="button"
             onClick={handleCreateOrder}
             disabled={items.length === 0 || isCreatingOrder}
-            className="cursor-pointer flex items-center justify-center rounded-full border border-primary py-3 text-sm font-semibold uppercase tracking-wide text-primary disabled:cursor-not-allowed disabled:border-zinc-300 disabled:text-zinc-300"
+            className="flex w-full items-center justify-center rounded-full border border-primary py-3 text-sm font-semibold uppercase tracking-wide text-primary disabled:cursor-not-allowed disabled:border-zinc-300 disabled:text-zinc-300"
           >
             {isCreatingOrder ? "Finalizando pedido..." : "Finalizar pedido"}
           </button>

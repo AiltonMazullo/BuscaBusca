@@ -1,24 +1,31 @@
-export type UserRole = "USER" | "ADMIN";
+export type UserRole = "admin" | "user";
 
 export interface User {
   id: number | string;
   name: string;
   email: string;
   role: UserRole;
-}
-
-/* FRONTEND FORM */
-export interface RegisterForm {
-  name: string;
-  email: string;
-  password: string;
+  cep?: string;
+  address?: string;
+  street?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
 }
 
 export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
+  role?: UserRole;
+  cep?: string;
+  address?: string;
+  street?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
 }
 
 export interface LoginRequest {

@@ -5,6 +5,7 @@ import { BenefitsBar } from "@/components/BenefitsBar";
 import { productsService } from "@/services/products.service";
 import type { Product } from "@/types/products.types";
 import { useEffect, useState } from "react";
+import { HomeBanner } from "@/components/HomeBanner";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,7 +33,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-8 pb-8">
       <BenefitsBar />
-
+      <HomeBanner />
       <section className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 sm:gap-8">
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-xl font-bold text-zinc-800 sm:text-2xl">

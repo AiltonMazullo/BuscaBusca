@@ -64,7 +64,7 @@ export function Header() {
     ? "/login"
     : isAdmin
       ? "/admin"
-      : "/my-profile";
+      : "/account";
 
   return (
     <header
