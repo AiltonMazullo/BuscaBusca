@@ -14,6 +14,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { SearchBar } from "@/components/SearchBar";
 
 export const MENU_ITEMS = [
   {
@@ -118,14 +119,7 @@ export function Header() {
               </div>
             </Link>
 
-            <div className="hidden flex-1 items-center rounded-md bg-zinc-100 px-4 py-3 text-sm text-zinc-700 sm:flex">
-              <input
-                type="text"
-                placeholder="O que você procura?"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-zinc-400"
-              />
-              <Search size={16} className="text-primary" />
-            </div>
+            <SearchBar />
 
             <div className="flex items-center gap-6">
               {!isAuthenticated ? (
