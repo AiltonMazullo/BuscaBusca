@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { Suspense, useEffect, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { productsService } from "@/services/products.service";
 import { ProductCard } from "@/components/ProductCard";
 import type { Product } from "@/types/products.types";
 import { Search } from "lucide-react";
 
-export default function SearchPage() {
+// Componente que usa useSearchParams
+function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
 
@@ -58,5 +59,20 @@ export default function SearchPage() {
         </div>
       )}
     </section>
+  );
+}
+
+// Page exportada envolve tudo em Suspense
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-[1280px] px-4 py-8">
+          <p className="text-sm text-zinc-500">Buscando produtos...</p>
+        </div>
+      }
+    >
+      <SearchResults />
+    </Suspense>
   );
 }
